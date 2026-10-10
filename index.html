@@ -67,6 +67,9 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .hbtn{border:0;border-radius:20px;padding:28px 0;font-size:1.4rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 24px #0004}.hbtn:active{transform:scale(.98)}
 .hf{background:#1b6fd1}.hr{background:#d98a1c;padding:20px 0;font-size:1.15rem}.ht{background:#c8102e}#homeResume{margin-top:-8px}
 .grade{font-size:4rem;font-weight:900;line-height:1;margin:6px 0 2px}.grade span{font-size:1.2rem;font-weight:700;opacity:.6}
+.party{width:100%;max-width:300px;max-height:30vh;object-fit:contain;border-radius:18px;display:block;margin:4px auto 10px;box-shadow:0 6px 18px #0002}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin:14px 0 4px}.gstats div{background:#f1f4f9;border-radius:12px;padding:10px 4px}.gstats b{display:block;font-size:1.3rem;color:#14233c}.gstats span{font-size:.68rem;color:#6b7a90}
+.goal .rbtn{width:100%;max-width:280px;margin-top:12px}
 .thint{text-align:center;font-size:.75rem;color:#9aa6b8;margin-top:10px}
 #tview{display:block;text-align:left;font-size:.95rem;line-height:1.35;overflow:auto}
 </style></head><body>
@@ -90,7 +93,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010o";
+const APPV="v20261010p";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -135,8 +138,12 @@ let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null
 if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
 const nw=C.filter(c=>!(data.hist[c.id]||[]).length).length;$("insight").textContent=at5==C.length?"":!t.f.h.length?at5+"/"+C.length+" at 5 today · "+nw+" new":"Focus: "+shortName(t.c)+" — "+why+" · "+at5+"/"+C.length+" at 5"}
 function goalScreen(){cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
-$("q").classList.remove("txt");$("q").classList.add("list");$("q").innerHTML='<div class="goal"><div class="big">🎉</div><h3>All cards at 5 today</h3><p>Every card rated 5 — nice work.</p><button class="rbtn" id="keep">Keep reviewing</button></div>';
-$("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()}}
+$("q").classList.remove("txt");$("q").classList.add("list");const P=["koala1","koala2","koala3","lion1","lion2","kangaroo1","kangaroo2"];let hsh=0;for(const ch of today())hsh=(hsh*31+ch.charCodeAt(0))>>>0;const gif=P[hsh%P.length];
+const nToday=C.reduce((n,c)=>n+(data.hist[c.id]||[]).filter(x=>x.d==today()).length,0);const all=C.flatMap(c=>data.hist[c.id]||[]);const allAvg=all.length?(all.reduce((a,x)=>a+x.r,0)/all.length).toFixed(1):"–";const lg=(data.grades||[]).slice(-1)[0];
+$("q").innerHTML='<div class="goal"><img class="party" src="img/party/'+gif+'.gif?v=1" alt="'+gif.replace(/\d/,"")+' partying"><h3>All cards at 5 today</h3><p>Every card rated 5 — nice work!</p>'+
+'<div class="gstats"><div><b>'+C.length+'/'+C.length+'</b><span>at 5 today</span></div><div><b>'+nToday+'</b><span>ratings today</span></div><div><b>'+allAvg+'</b><span>all-time avg</span></div>'+(lg?'<div><b style="color:'+gcol(lg.g)+'">'+lg.g+'</b><span>last test</span></div>':'')+'</div>'+
+'<button class="rbtn" id="keep">Keep reviewing</button><button class="rbtn" id="goalHome" style="background:#14233c">⌂ Home</button></div>';
+$("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()};$("goalHome").onclick=e=>{e.stopPropagation();view("homeView")}}
 function pool(){return C.filter(c=>(filt=="all"||String(c.s)==filt)&&(!reviewMode||revSet.includes(c.id)))}
 function pick(){const p=pool();const cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
 function backHTML(c){return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
