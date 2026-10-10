@@ -83,7 +83,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010g";
+const APPV="v20261010h";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -125,7 +125,7 @@ function shortName(c){return c.q.split("\n")[0].replace(/^[\d.]+\s*/,"").replace
 function insight(){if(testMode){$("insight").textContent="";return}const ranked=C.map(c=>({c,f:info(c),p:priority(c)})).sort((a,b)=>b.p-a.p);const t=ranked[0];const at5=C.filter(c=>todayRating(c.id)==5).length;
 let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null?"rated "+t.f.tr+" today":"avg "+t.f.ra.toFixed(1)+(t.f.days?", "+t.f.days+"d ago":"");
 if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
-$("insight").textContent=at5==C.length?"":"Focus: "+shortName(t.c)+" — "+why+"  ·  "+at5+"/"+C.length+" at 5 today"}
+const nw=C.filter(c=>!(data.hist[c.id]||[]).length).length;$("insight").textContent=at5==C.length?"":!t.f.h.length?at5+"/"+C.length+" at 5 today · "+nw+" new":"Focus: "+shortName(t.c)+" — "+why+" · "+at5+"/"+C.length+" at 5"}
 function goalScreen(){cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
 $("q").classList.remove("txt");$("q").classList.add("list");$("q").innerHTML='<div class="goal"><div class="big">🎉</div><h3>All cards at 5 today</h3><p>Every card rated 5 — nice work.</p><button class="rbtn" id="keep">Keep reviewing</button></div>';
 $("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()}}
