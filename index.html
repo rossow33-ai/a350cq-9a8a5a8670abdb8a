@@ -69,6 +69,10 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .hometitle{text-align:center;font-size:2.4rem;font-weight:800;letter-spacing:.02em}.homesub{text-align:center;font-size:.85rem;opacity:.6;margin-top:-10px;min-height:1em}
 .hbtn{border:0;border-radius:20px;padding:28px 0;font-size:1.4rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 24px #0004}.hbtn:active{transform:scale(.98)}
 .hf{background:#1b6fd1}.hp{background:#2a3f66}.hn{background:#2e9e5b}.hbtn{padding-left:12px;padding-right:12px}
+.stepbar{display:flex;justify-content:space-between;margin:-6px 0 8px}.stepbar button{background:none;border:0;color:#cfe0ff;font-size:.95rem;padding:6px 2px;cursor:pointer}
+.prow{display:flex;align-items:center;gap:12px;width:100%;background:#ffffff14;border:0;border-radius:16px;padding:18px 16px;margin-bottom:12px;color:#fff;font-size:1.05rem;font-weight:700;text-align:left;cursor:pointer}.prow:active{background:#ffffff26}
+.prow .nm{flex:1}.prow .av{font-size:.7rem;font-weight:500;opacity:.6;text-align:right}.badge{min-width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;background:#ffffff22}
+#plistView{flex:1;overflow:auto}
 .psec{display:flex;flex-direction:column;gap:16px;margin-top:18px}
 .tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
 .tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
@@ -97,9 +101,10 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 </style></head><body>
 <header><h1 id="hdrTitle"><img src="img/logo-96.png?v=2" alt="" class="logo">A350 Recurrent</h1><div id="who"><button class="icon" id="homeBtn" aria-label="Home">⌂</button><span id="testBadge" class="hide">TEST</span><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
 <div class="bar" id="barwrap"><i id="barfill"></i></div>
-<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hf" id="profFlash">Flashcards</button><button class="hbtn ht" id="profTest">Test Mode</button><button class="hbtn hr hide" id="profRev"></button><div class="homesub" id="profResume"></div></div></section>
+<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hp" id="homeProf">Profiles</button></div></section>
+<section id="plistView" class="hide"><button class="backlink" id="plBack">‹ Home</button><div class="hometitle" style="font-size:1.8rem;margin:6px 0 14px">Profiles</div><div id="plist"></div></section>
 
-<section id="deckView"><div id="insight" class="insight"></div>
+<section id="deckView"><div id="stepBar" class="stepbar hide"><button id="stBack">‹ Profiles</button><button id="stAll">Show all</button></div><div id="insight" class="insight"></div>
 <div class="scene" id="scene"><div class="card" id="card">
 <div class="face front"><span class="tag" id="tagF"></span><div class="txt" id="q"></div><span id="lvl" class="hide"></span></div>
 <div class="face back"><span class="tag" id="tagB"></span><div class="txt list" id="a"></div><div class="foot"><span></span><button class="srcbtn" id="srcBtn" title="View source slide">🖼️</button></div></div></div></div>
@@ -116,7 +121,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011b";
+const APPV="v20261011c";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -186,7 +191,7 @@ let tst={pos:0,run:{}};let ORDER=[...C].sort((a,b)=>a.s-b.s);function tsave(){tr
 function setDeck(id){const D=DECKS[id];deckId=id;C=D.cards;ORDER=id=="lim"?[...C].sort((a,b)=>a.s-b.s):[...C];KEY=D.key;TKEY=D.tkey;data=load();migrate();tst={pos:0,run:{}};try{const x=JSON.parse(localStorage.getItem(TKEY));if(x&&typeof x.pos=="number")tst=x}catch(e){}reviewMode=false;revSet=[];last=null;cur=null;
 $("deckTitle").textContent=D.title;$("deckBack").classList.toggle("hide",id=="lim");$("profSec").classList.toggle("hide",id!="lim");const empty=!C.length;["homeFlash","homeTest"].forEach(b=>$(b).classList.toggle("hide",empty));$("emptyMsg").classList.toggle("hide",!empty)}
 function migrate(){if(data.tests&&!data.testsMigrated){for(const id in data.tests){const h=(data.hist[id]=data.hist[id]||[]);data.tests[id].forEach(t=>h.push({d:t.d,r:t.p?5:1,src:"test"}));h.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0)}}if(data.tests&&!data.testsMigrated){data.testsMigrated=true;save()}}
-let reviewMode=false,revSet=[];
+let reviewMode=false,revSet=[],stepMode=false;
 let testMode=false,steps=[],tIdx=0,tRev=false;
 let data,filt="all",cur=null,last=null,flipped=false;
 function load(){let d;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}return d&&d.hist?d:{hist:{}}}
@@ -263,14 +268,14 @@ $("srcBtn").style.display=srcOf(cur)?"":"none"}
 function srcOf(c){return c&&(c.img||(c.s>=8?"img/slide"+c.s+".png?v=3":null))}
 function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("rate").classList.toggle("off",!flipped);$("ratelbl").style.visibility=flipped?"":"hidden"}
 function testResult(pass){if(!testMode||!flipped||!cur)return;const v=pass?"P":"F";tst.run[cur.id]=v;tst.pos++;tsave();(data.tests=data.tests||{});(data.tests[cur.id]=data.tests[cur.id]||[]).push({d:today(),p:pass});(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r:pass?5:1,src:"test"});save();last=cur;show()}
-function rate(r){if(!flipped||!cur||testMode)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});if(reviewMode&&r>=4)revSet=revSet.filter(x=>x!=cur.id);save();last=cur;show()}
+function rate(r){if(!flipped||!cur||testMode)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});if(stepMode){save();return openPlist()}if(reviewMode&&r>=4)revSet=revSet.filter(x=>x!=cur.id);save();last=cur;show()}
 function stats(){const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
 $("statsBody").innerHTML=(recentGrades()?'<div class="face" style="position:static;margin-bottom:14px;padding:16px 18px">'+recentGrades()+"</div>":"")+"<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>{const tt=(data.tests||{})[c.id]||[],np=tt.filter(t=>t.p).length,nf=tt.length-np;return "<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+(tt.length?'<div style="font-size:.72rem;opacity:.7;margin-top:2px">Test: <span class="ok">'+np+'✓</span> <span class="bad">'+nf+'✗</span></div>':"")+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>"}).join("")+"</table>"}
-function view(v){const HV=v=="homeView";if(HV&&deckId!="lim")setDeck("lim");if(HV)updProf();if(HV)reviewMode=false;updRev();$("menu").classList.add("hide");$("homeBtn").classList.toggle("hide",HV);$("menuBtn").classList.toggle("hide",HV);if(HV){$("testBadge").classList.add("hide");$("homeResume").textContent=tst.pos>0&&tst.pos<ORDER.length?"Test in progress · card "+(tst.pos+1)+"/"+ORDER.length:""}else $("testBadge").classList.toggle("hide",!testMode);["homeView","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
+function view(v){const HV=v=="homeView"||v=="plistView";if(v!="deckView")stepMode=false;$("stepBar").classList.toggle("hide",!stepMode);if(v=="homeView"&&deckId!="lim")setDeck("lim");if(HV)updProf();if(HV)reviewMode=false;updRev();$("menu").classList.add("hide");$("homeBtn").classList.toggle("hide",HV);$("menuBtn").classList.toggle("hide",HV||stepMode);if(HV){$("testBadge").classList.add("hide");$("homeResume").textContent=tst.pos>0&&tst.pos<ORDER.length?"Test in progress · card "+(tst.pos+1)+"/"+ORDER.length:""}else $("testBadge").classList.toggle("hide",!testMode);["homeView","plistView","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
 const closeMenu=()=>$("menu").classList.add("hide");
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
 $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src=srcOf(cur);$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
-$("scene").onclick=()=>{if(!cur)return;testMode?testTap():flip()};$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
+$("scene").onclick=()=>{if(!cur)return;stepMode?stepTap():testMode?testTap():flip()};$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
 $("passBtn").onclick=()=>testResult(true);$("failBtn").onclick=()=>testResult(false);
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
 function setTest(on){testMode=on;reviewMode=false;$("testMi").classList.toggle("hide",on);$("flashMi").classList.toggle("hide",!on);try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
@@ -278,13 +283,20 @@ $("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();if(!testMode)setTest(true
 $("testMi").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};$("flashMi").onclick=()=>setTest(false);
 $("homeRev").onclick=startReview;$("revMi").onclick=startReview;
 const goHome=()=>{if(deckId!="lim")setDeck("lim");view("homeView")};
-function updProf(){let d={},t={pos:0};try{d=JSON.parse(localStorage.getItem(DECKS.prof.key))||{};t=JSON.parse(localStorage.getItem(DECKS.prof.tkey))||t}catch(e){}const n=(d.lastFailed||[]).length,L=DECKS.prof.cards.length;
-$("profRev").classList.toggle("hide",!n);$("profRev").textContent="Review · "+n;$("profResume").textContent=t.pos>0&&t.pos<L?"Test in progress · card "+(t.pos+1)+"/"+L:""}
-$("profFlash").onclick=()=>{setDeck("prof");setTest(false)};$("profTest").onclick=()=>{setDeck("prof");if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};$("profRev").onclick=()=>{setDeck("prof");startReview()};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
+function updProf(){}
+function latest(id){const h=data.hist[id]||[];return h.length?h[h.length-1].r:null}
+function openPlist(){stepMode=false;setDeck("prof");$("plist").innerHTML=C.map(c=>{const r=latest(c.id),a=avg(c.id);return '<button class="prow" data-id="'+c.id+'"><span class="nm">'+esc(c.q)+'</span>'+(a!=null?'<span class="av">avg '+a.toFixed(1)+'</span>':'')+'<span class="badge" style="'+(r?'background:'+COL[r]:'')+'">'+(r||'–')+'</span></button>'}).join("");
+$("plist").querySelectorAll(".prow").forEach(b=>b.onclick=()=>startStep(b.dataset.id));view("plistView")}
+function startStep(id){if(deckId!="prof")setDeck("prof");stepMode=true;testMode=false;reviewMode=false;cur=C.find(c=>c.id==id);steps=mkSteps(cur);tIdx=-1;view("deckView");modeRows();$("card").classList.remove("flip");$("srcBtn").style.display="";$("tagF").textContent="Profile";$("q").classList.remove("txt");$("q").classList.add("list");renderStep()}
+function renderStep(){const done=tIdx==steps.length-1;let h='<div class="tq">'+esc(cur.q)+'</div>'+(tIdx>=0?tlHTML(cur,tIdx+1):'')+'<div class="thint">'+(done?'Rate yourself below ↓':tIdx<0?'Tap to start · '+steps.length+' lines':'Line '+(tIdx+1)+'/'+steps.length+' · tap for next')+'</div>';
+$("q").innerHTML=h;$("rate").classList.toggle("off",!done);$("ratelbl").style.visibility=done?"":"hidden";flipped=done;$("insight").textContent="";$("barfill").style.width=(steps.length?(tIdx+1)/steps.length*100:0)+"%";
+const f=$("q").parentElement;if(f.scrollTo)f.scrollTo({top:f.scrollHeight,behavior:tIdx<=0?"auto":"smooth"});else f.scrollTop=f.scrollHeight}
+function stepTap(){if(tIdx<steps.length-1){tIdx++;renderStep()}}
+$("homeProf").onclick=openPlist;$("plBack").onclick=()=>view("homeView");$("stBack").onclick=openPlist;$("stAll").onclick=()=>{tIdx=steps.length-1;renderStep()};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
 $("homeFlash").onclick=()=>setTest(false);$("homeTest").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};
 $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
 $("reset").onclick=()=>{if(confirm("Reset all ratings and history on this device?")){data={hist:{}};save();closeMenu();show()}};
-document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();testMode?testTap():flip()}else if(testMode&&/^[pP1]$/.test(e.key))testResult(true);else if(testMode&&/^[fF2]$/.test(e.key))testResult(false);else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
+document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();stepMode?stepTap():testMode?testTap():flip()}else if(testMode&&/^[pP1]$/.test(e.key))testResult(true);else if(testMode&&/^[fF2]$/.test(e.key))testResult(false);else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
 setDeck("lim");view("homeView");
 </script></body></html>
