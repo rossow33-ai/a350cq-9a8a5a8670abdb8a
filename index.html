@@ -79,13 +79,13 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <section id="statsView" class="hide"><button class="mi" id="back">← Back to cards</button><h2>Your progress</h2><div id="statsBody"></div></section>
 </main>
 <div id="menu" class="hide"><div class="panel">
-<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="testBtn">🧪  Test mode: OFF</button><button class="mi hide" id="restartMi">⟲  Restart test</button><button class="mi" id="statsBtn">📊  Stats</button>
+<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="testBtn">🧪  Test mode: OFF</button><button class="mi" id="restartMi">🔄  Restart test</button><button class="mi" id="statsBtn">📊  Stats</button>
 
 <div class="mh" id="pos"></div><div class="mh" id="prog" style="margin-top:0"></div>
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010i";
+const APPV="v20261010j";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -179,8 +179,8 @@ $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src="img/slide"+cur.s+".
 $("scene").onclick=()=>{if(!cur)return;testMode?testTap():flip()};$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
 $("passBtn").onclick=()=>testResult(true);$("failBtn").onclick=()=>testResult(false);
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
-function setTest(on){testMode=on;try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);$("restartMi").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
-$("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();closeMenu();view("deckView");show()};
+function setTest(on){testMode=on;try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
+$("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();if(!testMode)setTest(true);else{closeMenu();view("deckView");show()}};
 $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
 $("reset").onclick=()=>{if(confirm("Reset all ratings and history on this device?")){data={hist:{}};save();closeMenu();show()}};
