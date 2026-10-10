@@ -113,7 +113,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010y";
+const APPV="v20261010z";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -137,6 +137,16 @@ const LIM=[
 // To add a profile: append an object to PROFILES.
 // nodes: [nodeName, [[role, text, isAction], ...]]  role = "PF" | "PM"; isAction=true for dashed-box actions/selections.
 const PROFILES=[
+{id:"P-nto",name:"350 Normal Takeoff",img:"img/profiles/nrm-normal-takeoff.jpg",nodes:[
+["Takeoff",[["PF","Set Thrust",1],["PF","“Flex”"],["PM","“Man Flex”"]]],
+["80 Knots",[["PM","“80 Knots, Thrust Normal”"]]],
+["V1/VR",[["PM","“Rotate”"]]],
+["Positive Rate",[["PM","“Positive Rate”"],["PF","“Gear Up”"],["PM","Select Gear Up",1]]],
+["400′ AFE",[["PF","Select HDG/ Verify NAV",1],["PM","Verify FMA",1]]],
+["Thr Red/Accel Height",[["PF","Set CLB Thrust",1],["PF","“Climb”"],["PM","“Thrust Derate Climb”"]]],
+["F-Speed",[["PF","“Flaps 1”"],["PM","Select Flaps 1",1]]],
+["S-Speed",[["PF","“Flaps Up, After Takeoff Checklist”"],["PM","Select Flaps Up",1],["PM","Complete After Takeoff Checklist",1]]]
+]},
 {id:"P-efav1",name:"350 Engine Failure After V1",img:"img/profiles/emg-engine-failure-after-v1.jpg",nodes:[
 ["Takeoff",[["PF","Set Thrust",1],["PF","“Flex Set”"],["PM","“Man Flex”"]]],
 ["80 Knots",[["PM","“80 Knots, Thrust Normal”"]]],
