@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A350 Recurrent Flashcards</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(160deg,#0b1d3a,#13315c);color:#eef3fb;min-height:100vh}
+header{padding:18px 16px 6px;text-align:center}h1{margin:0;font-size:1.4rem}header p{margin:4px 0 0;opacity:.7;font-size:.85rem}
+.wrap{max-width:680px;margin:0 auto;padding:12px 16px 40px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
+.chip{border:1px solid #4a6fa5;background:transparent;color:#cfe0ff;padding:6px 12px;border-radius:999px;font-size:.8rem;cursor:pointer}.chip.on{background:#c8102e;border-color:#c8102e;color:#fff}
+.stats{display:flex;justify-content:space-between;font-size:.85rem;opacity:.85;margin:8px 2px}
+.bar{height:6px;background:#ffffff22;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:#3ccf7a;width:0;transition:width .3s}
+.scene{perspective:1200px;margin:16px 0;cursor:pointer}.card{position:relative;min-height:300px;transition:transform .5s;transform-style:preserve-3d}.card.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;color:#14233c;border-radius:16px;padding:22px;display:flex;flex-direction:column;box-shadow:0 10px 30px #0006;overflow:auto}
+.back{transform:rotateY(180deg);background:#f3fbf6}.tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#c8102e;font-weight:700}
+.txt{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.2rem;line-height:1.45;white-space:pre-line}.back .txt{font-weight:600;color:#0d5a2f}
+.hint{text-align:center;font-size:.72rem;opacity:.5}.status{position:absolute;top:16px;right:18px;font-size:.72rem;font-weight:700}
+.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+button.b{flex:1;min-width:90px;padding:12px;border:0;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;background:#ffffff1f;color:#fff}
+button.known{background:#2e9e5b}button.review{background:#d98a1c}
+.src{margin-top:18px;font-size:.8rem}.src summary{cursor:pointer;opacity:.8}.src img{width:100%;border-radius:8px;margin-top:8px;background:#fff}
+</style></head><body>
+<header><h1>✈️ A350 Recurrent Flashcards</h1><p>Limitations &amp; Memory Items · Systems Validation (slides 6, 8, 9, 10)</p></header>
+<div class="wrap">
+<div class="filters" id="filters"></div>
+<div class="stats"><span id="pos"></span><span id="prog"></span></div><div class="bar"><i id="barfill"></i></div>
+<div class="scene" id="scene"><div class="card" id="card">
+<div class="face front"><span class="tag" id="tagF"></span><span class="status" id="st"></span><div class="txt" id="q"></div><div class="hint">Tap card to flip · Space / ← →</div></div>
+<div class="face back"><span class="tag" id="tagB"></span><div class="txt" id="a"></div><div class="hint">Tap to flip back</div></div></div></div>
+<div class="row"><button class="b" id="prev">◀ Prev</button><button class="b" id="shuf">🔀 Shuffle</button><button class="b" id="next">Next ▶</button></div>
+<div class="row"><button class="b review" id="rev">↻ Review</button><button class="b known" id="kn">✓ Known</button></div>
+<div class="row"><button class="b" id="onlyrev">Show only unknown: off</button><button class="b" id="reset">Reset progress</button></div>
+<details class="src" id="srcbox"><summary>View source slide</summary><img id="srcimg" alt="Source slide"></details>
+</div>
+<script>
+const T={6:"Limitations",8:"Loss of Braking / Emer Descent",9:"Unreliable Airspeed / Stall at Liftoff",10:"Evacuation Flow"};
+const C=[
+[6,"Maximum Operating Altitude?","43,100′"],
+[6,"Maximum takeoff and landing tailwind component?","15 knots, or as restricted by Delta Company Pages"],
+[6,"Crosswind limit for takeoff, including gusts?","35 knots"],
+[6,"Crosswind limit for landing, including gusts?","40 knots"],
+[6,"On takeoff, the autopilot must not be engaged until at least ____ after lift-off.","5 seconds"],
+[6,"After a manual go-around, the autopilot must not be engaged below a minimum altitude of ____.","100′ AGL"],
+[6,"Autoland wind limit – headwind?","40 knots"],
+[6,"Autoland wind limit – tailwind?","15 knots, or as restricted by Delta Company Pages"],
+[6,"Autoland wind limit – crosswind?","30 knots, including gusts\n(15 knots when operating below Cat I minimums)"],
+[6,"Flight Controls – Maximum Flap Extension Altitude?","20,000′"],
+[8,"LOSS OF BRAKING – If no braking: memory items?","REV ........ MAX\nBRAKE PEDALS ........ RELEASE\nA-SKID OFF ........ ORDER\nA-SKID ........ OFF\nBRAKE PEDALS ........ PRESS"],
+[8,"LOSS OF BRAKING – If still no braking?","PARK BRK ........ USE"],
+[8,"EMER DESCENT – If cabin pressure altitude is above 10,000 ft: memory items?","CREW OXY MASKS ........ USE\nSIGNS ........ ON\nEMER DESCENT ........ INITIATE"],
+[8,"EMER DESCENT – Initiate the emergency descent with one of which techniques?","• AUTO EMER DESCENT function\n• Selected guidance via the AFS CP"],
+[8,"EMER DESCENT – If A/THR is not active?","ALL THR LEVERS ........ IDLE\nSPEED BRAKES LEVER ........ FULL"],
+[9,"UNRELIABLE AIRSPEED – If safe conduct of the flight is impacted: first three items?","A/P ........ OFF\nA/THR ........ OFF\nFD ........ OFF"],
+[9,"UNRELIABLE AIRSPEED – Pitch/thrust below THR RED ALT?","12.5° / TOGA"],
+[9,"UNRELIABLE AIRSPEED – Pitch/thrust above THR RED ALT and below FL100?","10° / CLB"],
+[9,"UNRELIABLE AIRSPEED – Pitch/thrust above THR RED ALT and above FL100?","5° / CLB"],
+[9,"UNRELIABLE AIRSPEED – FLAPS if CONF 0 (1)(2)(3)?","MAINTAIN CURRENT CONF"],
+[9,"UNRELIABLE AIRSPEED – FLAPS if CONF FULL?","SELECT CONF 3 AND MAINTAIN"],
+[9,"UNRELIABLE AIRSPEED – Speed brakes and L/G?","SPEED BRAKES ........ CHECK RETRACTED\nL/G ........ UP"],
+[9,"STALL WARNING AT LIFTOFF – Immediate actions?","THRUST ........ TOGA\nAt the same time:\nPITCH ATTITUDE ........ 12.5°\nBANK ........ WINGS LEVEL"],
+[10,"EVACUATION – What is the flow pattern (in order)?","STOP\nCONFIGURE\nSHUTDOWN\nEVACUATE"],
+[10,"EVACUATION – Why memorize the evacuation flow/philosophy?","In case the checklist cannot be read due to smoke/fire, darkness, injury or incapacitation – it leads the pilot through all critical tasks for the safest possible evacuation."],
+[10,"EVACUATION – Are the flow items included in the Evacuation checklist?","No – they refresh the logical pattern of procedures needed for a successful evacuation; the checklist follows the flow pattern."]
+].map((c,i)=>({id:i,s:c[0],q:c[1],a:c[2]}));
+const K="recurrentFC_v1";let st={};try{st=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
+let filt="all",onlyRev=false,deck=[],i=0;const $=id=>document.getElementById(id);
+function build(){deck=C.filter(c=>(filt=="all"||c.s==filt)&&(!onlyRev||st[c.id]!="k"));i=Math.min(i,Math.max(0,deck.length-1));show()}
+function show(){$("card").classList.remove("flip");const pool=C.filter(c=>filt=="all"||c.s==filt),kn=pool.filter(c=>st[c.id]=="k").length;
+$("prog").textContent=kn+"/"+pool.length+" known";$("barfill").style.width=(pool.length?kn/pool.length*100:0)+"%";
+if(!deck.length){$("q").textContent="🎉 All cards in this set are marked known!";$("a").textContent="";$("pos").textContent="0/0";$("tagF").textContent=$("tagB").textContent=$("st").textContent="";return}
+const c=deck[i];$("pos").textContent="Card "+(i+1)+" / "+deck.length;$("tagF").textContent=$("tagB").textContent="Slide "+c.s+" · "+T[c.s];
+$("q").textContent=c.q;$("a").textContent=c.a;$("st").textContent=st[c.id]=="k"?"✓ KNOWN":st[c.id]=="r"?"↻ REVIEW":"";$("st").style.color=st[c.id]=="k"?"#2e9e5b":"#d98a1c";
+$("srcbox").style.display=c.s==6?"none":"";$("srcimg").src="img/slide"+c.s+".png"}
+const mv=d=>{if(deck.length){i=(i+d+deck.length)%deck.length;show()}};
+function mark(v){if(!deck.length)return;st[deck[i].id]=v;save();if(onlyRev&&v=="k"){build()}else mv(1)}
+const fl=$("filters");[["all","All"],...Object.entries(T)].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=k=="all"?v:"S"+k+": "+v;b.onclick=()=>{filt=k;i=0;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");build()};fl.appendChild(b)});
+$("scene").onclick=()=>$("card").classList.toggle("flip");$("prev").onclick=()=>mv(-1);$("next").onclick=()=>mv(1);
+$("shuf").onclick=()=>{for(let j=deck.length-1;j>0;j--){const r=Math.floor(Math.random()*(j+1));[deck[j],deck[r]]=[deck[r],deck[j]]}i=0;show()};
+$("kn").onclick=()=>mark("k");$("rev").onclick=()=>mark("r");
+$("onlyrev").onclick=e=>{onlyRev=!onlyRev;e.target.textContent="Show only unknown: "+(onlyRev?"on":"off");i=0;build()};
+$("reset").onclick=()=>{if(confirm("Reset all progress?")){st={};save();build()}};
+document.addEventListener("keydown",e=>{if(e.key=="ArrowRight")mv(1);else if(e.key=="ArrowLeft")mv(-1);else if(e.key==" "){e.preventDefault();$("card").classList.toggle("flip")}else if(e.key=="k")mark("k");else if(e.key=="r")mark("r")});
+build();
+</script></body></html>
