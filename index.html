@@ -12,7 +12,7 @@ header h1{margin:0;font-size:1rem;font-weight:600;letter-spacing:.02em;opacity:.
 #who{display:flex;align-items:center;gap:6px}#pprShow{font-size:.8rem;opacity:.55}
 .icon{background:none;border:0;color:#fff;font-size:1.5rem;width:44px;height:44px;border-radius:12px;cursor:pointer}.icon:active{background:#ffffff1a}
 .bar{height:3px;background:#ffffff14;max-width:640px;width:calc(100% - 36px);margin:0 auto;border-radius:2px;overflow:hidden}.bar i{display:block;height:100%;background:#3ccf7a;width:0;transition:width .3s}
-main{flex:1;display:flex;flex-direction:column;max-width:640px;width:100%;margin:0 auto;padding:16px 18px calc(20px + env(safe-area-inset-bottom))}
+main{flex:1;display:flex;flex-direction:column;max-width:640px;width:100%;margin:0 auto;padding:16px 18px 8px}
 #deckView{flex:1;display:flex;flex-direction:column}
 .scene{perspective:1200px;flex:1;display:flex;cursor:pointer;min-height:320px}
 .card{position:relative;flex:1;transition:transform .45s;transform-style:preserve-3d}.card.flip{transform:rotateY(180deg)}
@@ -73,6 +73,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .party{width:100%;max-width:300px;max-height:30vh;object-fit:contain;border-radius:18px;display:block;margin:4px auto 10px;box-shadow:0 6px 18px #0002}
 .gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px;margin:14px 0 4px}.gstats div{background:#f1f4f9;border-radius:12px;padding:10px 4px}.gstats b{display:block;font-size:1.3rem;color:#14233c}.gstats span{font-size:.68rem;color:#6b7a90}
 .goal .rbtn{width:100%;max-width:280px;margin-top:12px}
+.legal{flex:none;max-width:640px;width:100%;margin:0 auto;padding:6px 18px calc(8px + env(safe-area-inset-bottom));font-size:.62rem;line-height:1.35;color:#8a97ab;opacity:.75;text-align:center}
 .thint{text-align:center;font-size:.75rem;color:#9aa6b8;margin-top:10px}
 #tview{display:block;text-align:left;font-size:.95rem;line-height:1.35;overflow:auto}
 </style></head><body>
@@ -89,6 +90,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 </section>
 <section id="statsView" class="hide"><button class="mi" id="back">← Back to cards</button><h2>Your progress</h2><div id="statsBody"></div></section>
 </main>
+<footer class="legal">Not approved training material. For personal study only. Always refer to official Delta/Airbus manuals and current company publications. Not affiliated with or endorsed by Delta Air Lines or Airbus.</footer>
 <div id="menu" class="hide"><div class="panel">
 <button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="homeMi">⌂  Home</button><button class="mi hide" id="testBtn"></button><button class="mi hide" id="revMi"></button><button class="mi" id="restartMi">🔄  Restart test</button><button class="mi" id="statsBtn">📊  Stats</button>
 
@@ -96,7 +98,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010r";
+const APPV="v20261010s";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
