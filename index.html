@@ -73,6 +73,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .prow{display:flex;align-items:center;gap:12px;width:100%;background:#ffffff14;border:0;border-radius:16px;padding:18px 16px;margin-bottom:12px;color:#fff;font-size:1.05rem;font-weight:700;text-align:left;cursor:pointer}.prow:active{background:#ffffff26}
 .prow .nm{flex:1}.prow .av{font-size:.7rem;font-weight:500;opacity:.6;text-align:right}.badge{min-width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;background:#ffffff22}
 #plistView{flex:1;overflow:auto}
+.tac{display:flex!important;justify-content:center;position:relative;z-index:1;margin:4px 0}.tac .chip{flex:0 0 auto;width:auto;max-width:70%;background:#eceef2;color:#4a5160;border:1px solid #c9ced8;font-style:normal}.chip.cac{background:#eceef2;color:#4a5160;border:1px solid #c9ced8;font-style:normal}.chip.cac .rl{color:#6b7280}
 .psec{display:flex;flex-direction:column;gap:16px;margin-top:18px}
 .tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
 .tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
@@ -121,7 +122,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011g";
+const APPV="v20261011h";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -175,6 +176,23 @@ const PROFILES=[
 ["F-Speed",[["PF","“Flaps 1”"],["PM","Select Flaps 1",1]]],
 ["S-Speed",[["PF","“Flaps Up, After Takeoff Checklist”"],["PM","Select Flaps Up",1],["PM","Complete After Takeoff Checklist",1]]],
 ["At Green Dot",[["PF","Select Open Climb",1],["PF","“Open Climb”"],["PM","“Open Climb”"],["PF","Select MCT",1],["PF","“MCT”"],["PM","“Thrust MCT”"]]]
+]},
+{id:"P-ws",name:"350 Windshear Escape",img:"img/profiles/emg-windshear-escape.jpg",nodes:[
+["At First Indication of W/S",[["PF","Select/Verify TOGA",1],["PF","If A/P Engaged, Keep Engaged",1],["PF","If A/P Not Engaged, Follow SRS",1]]],
+["In Windshear",[["PF","Maintain Config",1],["PM","Call Out Altitude and IVSI Trends",1]]],
+{div:"▲ Area of Windshear"},
+["Out of Windshear",[["PF","Select Climb Thrust",1],["PF","“Climb”"],["PM","“Thrust Climb”"],["PF","Clean Up A/C as Necessary",1],["PM","Configure A/C as Commanded",1],["PM","Make PIREP",1]]]
+]},
+{id:"P-ils",name:"350 CAT I ILS Approach",img:"img/profiles/nrm-cat1-ils.jpg",nodes:[
+["On Vectors",[["PF","At Flaps 1 and S-Speed",1]]],
+["Cleared for Approach",[["PF","Select APPR",1],["PF","“Approach”"],["PM","“Glide Slope, Localizer Armed”"],["PF","Select Second Autopilot",1],["PF","“Flaps 2”"],["PM","Select Flaps 2",1]]],
+["G/S Alive",[["PF","“Gear Down, Flaps 3”"],["PM","Select Gear Down, Flaps 3",1]]],
+["G/S Intercept",[["PF","“Flaps Full, Landing Checklist”"],["PM","Select Flaps Full",1],["PM","Complete Landing Checklist",1]]],
+["1000′ AGL",[["AC","“1000”"],["PM","“Cleared to Land, All Green”"]]],
+["500′ AGL",[["AC","“500”"]]],
+["100′ Above DA",[["AC","“Hundred Above”"]]],
+["Minimums",[["CA","“APP LTS in Sight”"],["FO","“APP LTS in Sight”"],["AC","“Minimums”"]]],
+["100′ Above TDZE",[["CA","“Runway in Sight”"],["FO","“Runway in Sight”"],["PF","Disengage Autopilot as Required",1]]]
 ]}
 ];
 const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.filter(n=>Array.isArray(n)).flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
@@ -229,7 +247,7 @@ if(r[0]=="f"||r[0]=="v")return '<div class="flow">'+(reveal?esc(r[1]):H)+'</div>
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+(reveal?esc(r[1]):H)+'</span></div>'}
 function tlHTML(c,n){const mix=c.nodes.some(x=>Array.isArray(x)&&x[1].some(l=>l[0]=="CA"||l[0]=="FO"));let h='<div class="tl"><div class="tlh"><span>'+(mix?"PF / CA":"PF")+'</span><span></span><span>'+(mix?"PM / FO":"PM")+'</span></div>',k=0;
 for(const nd of c.nodes){if(k>=n)break;if(!Array.isArray(nd)){if(k>0)h+='<div class="tdivr"><span>'+esc(nd.div)+'</span></div>';continue}const [node,lines]=nd;const em=/failure|fire|warning|stall/i.test(node);h+='<div class="tln"><span class="pill'+(em?' em':'')+'">'+esc(node)+'</span></div>';
-for(const l of lines){if(k>=n)break;k++;const L=l[0]=="PF"||l[0]=="CA";const chip='<span class="chip '+(l[2]?'act':'say')+(L?' cpf':' cpm')+'">'+(mix?'<b class="rl">'+l[0]+'</b> ':'')+(l[2]?'▢ ':'')+esc(l[1])+'</span>';
+for(const l of lines){if(k>=n)break;k++;if(l[0]=="AC"){h+='<div class="tlr tac'+(k==n?' ln':'')+'"><span class="chip say cac"><b class="rl">AC</b> '+esc(l[1])+'</span></div>';continue}const L=l[0]=="PF"||l[0]=="CA";const chip='<span class="chip '+(l[2]?'act':'say')+(L?' cpf':' cpm')+'">'+(mix?'<b class="rl">'+l[0]+'</b> ':'')+(l[2]?'▢ ':'')+esc(l[1])+'</span>';
 h+='<div class="tlr'+(k==n?' ln':'')+'"><div class="tc l">'+(L?chip:'')+'</div><div class="tdot"></div><div class="tc r">'+(L?'':chip)+'</div></div>'}}
 return h+'</div>'}
 function cardLog(c,idx,n,steps,r){if(c.nodes){return '<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>'+(n>0?tlHTML(c,n):'')}let h='<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>';
