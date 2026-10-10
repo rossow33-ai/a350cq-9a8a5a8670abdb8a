@@ -119,7 +119,7 @@ function avg(id){const h=data.hist[id]||[];return h.length?h.reduce((s,x)=>s+x.r
 function info(c){const h=data.hist[c.id]||[];const tr=todayRating(c.id);let ra=null;if(h.length){let sw=0,sv=0,w=1;for(let k=h.length-1;k>=0&&k>=h.length-8;k--){sv+=h[k].r*w;sw+=w;w*=0.6}ra=sv/sw}
 const lapse=h.length>1?Math.max(0,h[h.length-2].r-h[h.length-1].r):0;const lastD=h.length?h[h.length-1].d:null;const days=lastD?Math.max(0,Math.round((new Date(today())-new Date(lastD))/864e5)):null;
 const seen=(data.seen||{})[c.id]||0;const mins=(Date.now()-seen)/6e4;return{h,tr,ra,lapse,days,mins}}
-function priority(c){const f=info(c);if(!f.h.length)return 100;const lvl=f.tr??f.ra;let p=Math.pow(6-lvl,2)+1;p+=8*f.lapse;if(f.tr==null)p+=Math.min(f.days||0,14)*0.7+3;if(f.tr==5)p=0.4;if(f.mins<2)p*=0.3;return p}
+function priority(c){const f=info(c);if(!f.h.length)return 100;const lvl=f.tr??f.ra;let p=Math.pow(6-lvl,2)+1;p+=8*f.lapse;if(f.tr==null)p+=Math.min(f.days||0,14)*0.7+3;if(f.tr==5)p=0.1;if(f.mins<2)p*=0.3;return p}
 function weight(c){return priority(c)}
 function shortName(c){return c.q.split("\n")[0].replace(/^[\d.]+\s*/,"").replace(/\s*memory items/i,"")}
 function insight(){if(testMode){$("insight").textContent="";return}const ranked=C.map(c=>({c,f:info(c),p:priority(c)})).sort((a,b)=>b.p-a.p);const t=ranked[0];const at5=C.filter(c=>todayRating(c.id)==5).length;
