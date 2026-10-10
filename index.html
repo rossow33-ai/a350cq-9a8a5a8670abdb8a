@@ -72,7 +72,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .psec{display:flex;flex-direction:column;gap:16px;margin-top:18px}
 .tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
 .tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
-.tlh{position:sticky;top:-28px;z-index:2;display:grid;grid-template-columns:1fr 14px 1fr;gap:6px;background:#fff;box-shadow:0 -28px 0 #fff;padding:6px 0;font-size:.7rem;font-weight:800;letter-spacing:.08em}
+.tlh{position:sticky;top:-28px;margin-top:0;z-index:2;display:grid;grid-template-columns:1fr 14px 1fr;gap:6px;background:#fff;box-shadow:0 -40px 0 12px #fff;padding:6px 0;font-size:.7rem;font-weight:800;letter-spacing:.08em}
+.tlh:after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(#fff,#fff0);pointer-events:none}
 .tlh span:first-child{text-align:right;color:#c8102e}.tlh span:last-child{color:#4a6fa5}
 .tln{position:relative;z-index:1;text-align:center;margin:12px 0 6px}
 .pill{display:inline-block;background:#14233c;color:#fff;font-weight:800;font-size:.8rem;padding:5px 12px;border-radius:999px;box-shadow:0 0 0 4px #fff}.pill.em{background:#c8102e}
@@ -115,7 +116,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011a";
+const APPV="v20261011b";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -228,7 +229,7 @@ h+='<div class="tlr'+(k==n?' ln':'')+'"><div class="tc l">'+(L?chip:'')+'</div><
 return h+'</div>'}
 function cardLog(c,idx,n,steps,r){if(c.nodes){return '<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>'+(n>0?tlHTML(c,n):'')}let h='<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>';
 steps.forEach((s,i)=>{if(i>=n)return;s.conds.forEach(x=>h+='<div class="cond">'+esc(x)+'</div>');h+='<div class="ln">'+rowHTML(s.r,true)+'</div>'});return h}
-function renderTest(){let h="";for(let k=0;k<tst.pos;k++){const c=ORDER[k];if(tst.run[c.id]==null)continue;const st=mkSteps(c);h+=cardLog(c,k,st.length,st,tst.run[c.id])}
+function renderTest(){let h="";for(let k=deckId=="prof"?tst.pos:0;k<tst.pos;k++){const c=ORDER[k];if(tst.run[c.id]==null)continue;const st=mkSteps(c);h+=cardLog(c,k,st.length,st,tst.run[c.id])}
 const done=tIdx==steps.length-1;h+='<div id="curCard">'+cardLog(cur,tst.pos,tIdx+1,steps,null)+'<div class="tp">'+(tIdx<0?'':'Line '+(tIdx+1)+'/'+steps.length)+'</div></div>';
 h+='<div class="thint">'+(done?'Pass or fail below ↓':tIdx<0?'Tap to reveal line 1 of '+steps.length:'Tap for next line')+'</div>';
 $("q").innerHTML=h;$("pf").classList.toggle("off",!done);flipped=done;
