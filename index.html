@@ -90,7 +90,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010n";
+const APPV="v20261010o";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -130,7 +130,7 @@ const seen=(data.seen||{})[c.id]||0;const mins=(Date.now()-seen)/6e4;return{h,tr
 function priority(c){const f=info(c);if(!f.h.length)return 100;const lvl=f.tr??f.ra;let p=Math.pow(6-lvl,2)+1;p+=8*f.lapse;if(f.tr==null)p+=Math.min(f.days||0,14)*0.7+3;if(f.tr==5)p=0.1;if(f.mins<2)p*=0.3;return p}
 function weight(c){return priority(c)}
 function shortName(c){return c.q.split("\n")[0].replace(/^[\d.]+\s*/,"").replace(/\s*memory items/i,"")}
-function insight(){if(testMode){$("insight").textContent="";return}if(reviewMode){$("insight").textContent="Reviewing failed · "+revSet.length+" left";return}const ranked=C.map(c=>({c,f:info(c),p:priority(c)})).sort((a,b)=>b.p-a.p);const t=ranked[0];const at5=C.filter(c=>todayRating(c.id)==5).length;
+function insight(){if(testMode){$("insight").textContent="";return}if(reviewMode){$("insight").textContent="Review · "+revSet.length+" left";return}const ranked=C.map(c=>({c,f:info(c),p:priority(c)})).sort((a,b)=>b.p-a.p);const t=ranked[0];const at5=C.filter(c=>todayRating(c.id)==5).length;
 let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null?"rated "+t.f.tr+" today":"avg "+t.f.ra.toFixed(1)+(t.f.days?", "+t.f.days+"d ago":"");
 if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
 const nw=C.filter(c=>!(data.hist[c.id]||[]).length).length;$("insight").textContent=at5==C.length?"":!t.f.h.length?at5+"/"+C.length+" at 5 today · "+nw+" new":"Focus: "+shortName(t.c)+" — "+why+" · "+at5+"/"+C.length+" at 5"}
@@ -165,11 +165,11 @@ const np=ORDER.filter(c=>tst.run[c.id]=="P").length,fails=ORDER.filter(c=>tst.ru
 if(!tst.graded){tst.graded=true;tsave();data.lastFailed=fails.map(c=>c.id);(data.grades=data.grades||[]).push({d:today(),g:grade,p:np,n:ORDER.length});save()}
 $("q").innerHTML='<div class="goal"><div class="big">'+(fails.length?'📋':'🏆')+'</div><h3>Test complete</h3><div class="grade" style="color:'+gcol(grade)+'">'+grade+'<span> / 100</span></div><p style="font-size:1.1rem;font-weight:700;color:#14233c">'+np+'/'+ORDER.length+' passed</p></div>'+
 (fails.length?'<div class="cond">Failed / skipped:</div>'+fails.map(c=>'<div class="it"><b>'+esc(c.q.replace(/\n/g," — "))+'</b><span class="dl"></span><span class="ac bad">'+(tst.run[c.id]=="F"?"✗ Fail":"– skipped")+'</span></div>').join(""):'')+
-recentGrades()+(fails.length?'<button class="rbtn" id="revBtn2" style="background:#d98a1c">Review failed ('+fails.length+')</button>':'')+'<button class="rbtn" id="restart">Restart test</button>';if($("revBtn2"))$("revBtn2").onclick=e=>{e.stopPropagation();startReview()};updRev();
+recentGrades()+(fails.length?'<button class="rbtn" id="revBtn2" style="background:#d98a1c">Review · '+fails.length+'</button>':'')+'<button class="rbtn" id="restart">Restart test</button>';if($("revBtn2"))$("revBtn2").onclick=e=>{e.stopPropagation();startReview()};updRev();
 $("restart").onclick=e=>{e.stopPropagation();tst={pos:0,run:{}};tsave();show()}}
 function modeRows(){$("rate").classList.toggle("hide",testMode);$("ratelbl").classList.toggle("hide",testMode);$("pf").classList.toggle("hide",!testMode);$("pf").classList.add("off")}
 function failedIds(){return data.lastFailed||[]}
-function updRev(){const n=failedIds().length;["homeRev","revMi"].forEach(id=>{$(id).classList.toggle("hide",!n);$(id).textContent=(id=="revMi"?"🔁  ":"")+"Review failed ("+n+")"})}
+function updRev(){const n=failedIds().length;["homeRev","revMi"].forEach(id=>{$(id).classList.toggle("hide",!n);$(id).textContent=(id=="revMi"?"🔁  ":"")+"Review · "+n})}
 function revDone(){cur=null;flipped=false;modeRows();$("card").classList.remove("flip");$("srcBtn").style.display="none";$("insight").textContent="";$("tagF").textContent="";$("q").classList.remove("txt");$("q").classList.add("list");
 $("q").innerHTML='<div class="goal"><div class="big">✔</div><h3>All failed items reviewed</h3><p>Each one rated 4 or 5.</p><button class="rbtn" id="revHome">⌂ Home</button></div>';$("revHome").onclick=e=>{e.stopPropagation();reviewMode=false;view("homeView")}}
 function startReview(){revSet=failedIds().slice();reviewMode=true;last=null;testMode=false;$("testBadge").classList.add("hide");closeMenu();view("deckView");show()}
