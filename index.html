@@ -85,7 +85,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010j";
+const APPV="v20261010k";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -168,10 +168,10 @@ if(testMode){steps=mkSteps(cur);tIdx=-1;tRev=false;$("q").id="q";$("q").classLis
 const av=avg(cur.id);$("lvl").textContent=av!=null?"avg "+av.toFixed(1):"New card";
 $("srcBtn").style.display=cur.s==6?"none":""}
 function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("rate").classList.toggle("off",!flipped);$("ratelbl").style.visibility=flipped?"":"hidden"}
-function testResult(pass){if(!testMode||!flipped||!cur)return;const v=pass?"P":"F";tst.run[cur.id]=v;tst.pos++;tsave();(data.tests=data.tests||{});(data.tests[cur.id]=data.tests[cur.id]||[]).push({d:today(),p:pass});save();last=cur;show()}
+function testResult(pass){if(!testMode||!flipped||!cur)return;const v=pass?"P":"F";tst.run[cur.id]=v;tst.pos++;tsave();(data.tests=data.tests||{});(data.tests[cur.id]=data.tests[cur.id]||[]).push({d:today(),p:pass});(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r:pass?5:1,src:"test"});save();last=cur;show()}
 function rate(r){if(!flipped||!cur||testMode)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});save();last=cur;show()}
 function stats(){const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
-$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>"<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>").join("")+"</table>"}
+$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>{const tt=(data.tests||{})[c.id]||[],np=tt.filter(t=>t.p).length,nf=tt.length-np;return "<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+(tt.length?'<div style="font-size:.72rem;opacity:.7;margin-top:2px">Test: <span class="ok">'+np+'✓</span> <span class="bad">'+nf+'✗</span></div>':"")+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>"}).join("")+"</table>"}
 function view(v){$("menu").classList.add("hide");["deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
 const closeMenu=()=>$("menu").classList.add("hide");
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
@@ -185,5 +185,5 @@ $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu")
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
 $("reset").onclick=()=>{if(confirm("Reset all ratings and history on this device?")){data={hist:{}};save();closeMenu();show()}};
 document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();testMode?testTap():flip()}else if(testMode&&/^[pP1]$/.test(e.key))testResult(true);else if(testMode&&/^[fF2]$/.test(e.key))testResult(false);else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
-data=load();let md=null;try{md=localStorage.getItem("recurrentFC_mode")}catch(e){}if(md=="test")setTest(true);else show();
+data=load();if(data.tests&&!data.testsMigrated){for(const id in data.tests){const h=(data.hist[id]=data.hist[id]||[]);data.tests[id].forEach(t=>h.push({d:t.d,r:t.p?5:1,src:"test"}));h.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0)}}data.testsMigrated=true;save();let md=null;try{md=localStorage.getItem("recurrentFC_mode")}catch(e){}if(md=="test")setTest(true);else show();
 </script></body></html>
