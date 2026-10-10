@@ -66,6 +66,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .hometitle{text-align:center;font-size:2.4rem;font-weight:800;letter-spacing:.02em}.homesub{text-align:center;font-size:.85rem;opacity:.6;margin-top:-10px;min-height:1em}
 .hbtn{border:0;border-radius:20px;padding:28px 0;font-size:1.4rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 24px #0004}.hbtn:active{transform:scale(.98)}
 .hf{background:#1b6fd1}.ht{background:#c8102e}#homeResume{margin-top:-8px}
+.grade{font-size:4rem;font-weight:900;line-height:1;margin:6px 0 2px}.grade span{font-size:1.2rem;font-weight:700;opacity:.6}
 .thint{text-align:center;font-size:.75rem;color:#9aa6b8;margin-top:10px}
 #tview{display:block;text-align:left;font-size:.95rem;line-height:1.35;overflow:auto}
 </style></head><body>
@@ -89,7 +90,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010l";
+const APPV="v20261010m";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -155,12 +156,15 @@ $("q").innerHTML=h;$("pf").classList.toggle("off",!done);flipped=done;
 const f=$("q").parentElement,nl=$("q").querySelectorAll(".ln"),last=nl[nl.length-1];
 const go=()=>{if(f.scrollTo)f.scrollTo({top:f.scrollHeight,behavior:tIdx<0&&!tst.pos?"auto":"smooth"});else f.scrollTop=f.scrollHeight};go()}
 function testTap(){if(tst.pos>=ORDER.length)return;if(tIdx<steps.length-1){tIdx++;renderTest()}}
+function gcol(g){return g>=90?"#2e9e5b":g>=70?"#d98a1c":"#d7263d"}
+function recentGrades(){const g=(data.grades||[]).slice(-5).reverse();if(!g.length)return "";return '<div class="cond" style="color:#14233c">Recent test grades</div>'+g.map(x=>'<div class="it"><b>'+x.d+'</b><span class="dl"></span><span class="ac" style="color:'+gcol(x.g)+'">'+x.g+' / 100</span></div>').join("")}
 function testDone(){cur=null;flipped=false;modeRows();$("card").classList.remove("flip");$("srcBtn").style.display="none";$("insight").textContent="";
 $("tagF").textContent="Test complete";$("q").classList.remove("txt");$("q").classList.add("list");
-const np=ORDER.filter(c=>tst.run[c.id]=="P").length,fails=ORDER.filter(c=>tst.run[c.id]!="P");
-$("q").innerHTML='<div class="goal"><div class="big">'+(fails.length?'📋':'🏆')+'</div><h3>Test complete</h3><p style="font-size:1.4rem;font-weight:800;color:'+(fails.length?'#14233c':'#2e9e5b')+'">'+np+'/'+ORDER.length+' passed</p></div>'+
+const np=ORDER.filter(c=>tst.run[c.id]=="P").length,fails=ORDER.filter(c=>tst.run[c.id]!="P");const grade=Math.round(np/ORDER.length*100);
+if(!tst.graded){tst.graded=true;tsave();(data.grades=data.grades||[]).push({d:today(),g:grade,p:np,n:ORDER.length});save()}
+$("q").innerHTML='<div class="goal"><div class="big">'+(fails.length?'📋':'🏆')+'</div><h3>Test complete</h3><div class="grade" style="color:'+gcol(grade)+'">'+grade+'<span> / 100</span></div><p style="font-size:1.1rem;font-weight:700;color:#14233c">'+np+'/'+ORDER.length+' passed</p></div>'+
 (fails.length?'<div class="cond">Failed / skipped:</div>'+fails.map(c=>'<div class="it"><b>'+esc(c.q.replace(/\n/g," — "))+'</b><span class="dl"></span><span class="ac bad">'+(tst.run[c.id]=="F"?"✗ Fail":"– skipped")+'</span></div>').join(""):'')+
-'<button class="rbtn" id="restart">Restart test</button>';
+recentGrades()+'<button class="rbtn" id="restart">Restart test</button>';
 $("restart").onclick=e=>{e.stopPropagation();tst={pos:0,run:{}};tsave();show()}}
 function modeRows(){$("rate").classList.toggle("hide",testMode);$("ratelbl").classList.toggle("hide",testMode);$("pf").classList.toggle("hide",!testMode);$("pf").classList.add("off")}
 function show(){modeRows();if(testMode&&tst.pos>=ORDER.length)return testDone();if(!testMode&&data.keep!=today()&&C.every(c=>todayRating(c.id)==5))return goalScreen();cur=testMode?ORDER[tst.pos]:pick();insight();(data.seen=data.seen||{})[cur.id]=Date.now();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";
@@ -175,7 +179,7 @@ function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("r
 function testResult(pass){if(!testMode||!flipped||!cur)return;const v=pass?"P":"F";tst.run[cur.id]=v;tst.pos++;tsave();(data.tests=data.tests||{});(data.tests[cur.id]=data.tests[cur.id]||[]).push({d:today(),p:pass});(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r:pass?5:1,src:"test"});save();last=cur;show()}
 function rate(r){if(!flipped||!cur||testMode)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});save();last=cur;show()}
 function stats(){const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
-$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>{const tt=(data.tests||{})[c.id]||[],np=tt.filter(t=>t.p).length,nf=tt.length-np;return "<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+(tt.length?'<div style="font-size:.72rem;opacity:.7;margin-top:2px">Test: <span class="ok">'+np+'✓</span> <span class="bad">'+nf+'✗</span></div>':"")+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>"}).join("")+"</table>"}
+$("statsBody").innerHTML=(recentGrades()?'<div class="face" style="position:static;margin-bottom:14px;padding:16px 18px">'+recentGrades()+"</div>":"")+"<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>{const tt=(data.tests||{})[c.id]||[],np=tt.filter(t=>t.p).length,nf=tt.length-np;return "<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+(tt.length?'<div style="font-size:.72rem;opacity:.7;margin-top:2px">Test: <span class="ok">'+np+'✓</span> <span class="bad">'+nf+'✗</span></div>':"")+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>"}).join("")+"</table>"}
 function view(v){$("menu").classList.add("hide");$("homeBtn").classList.toggle("hide",v=="homeView");$("menuBtn").classList.toggle("hide",v=="homeView");if(v=="homeView"){$("testBadge").classList.add("hide");$("homeResume").textContent=tst.pos>0&&tst.pos<ORDER.length?"Test in progress · card "+(tst.pos+1)+"/"+ORDER.length:""}else $("testBadge").classList.toggle("hide",!testMode);["homeView","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
 const closeMenu=()=>$("menu").classList.add("hide");
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
