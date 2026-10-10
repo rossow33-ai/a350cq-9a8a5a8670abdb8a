@@ -122,7 +122,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011m";
+const APPV="v20261011n";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -231,6 +231,15 @@ const PROFILES=[
 ["1000′ AGL",[["AC","“1000”"],["PM","“Cleared to Land, All Green”"]]],
 ["500′ AGL",[["AC","“500”"]]],
 ["Touchdown",[["PF","Select Brakes and Reverse as Necessary",1],["PM","“Spoilers Up”"]]]
+]},
+{id:"P-nl",name:"350 Normal Landing",img:"img/profiles/nrm-normal-landing.jpg",nodes:[
+["1000′ AFE",[["AC","“1000”"],["PM","“Cleared to Land, All Green”"],["PF","Fully Configured",1],["PF","Des Rate Less Than 1000′ FPM",1],["PF","Aligned with Runway",1]]],
+["500′ AFE",[["AC","“500”"],["PF","On Target Speed",1],["PF","Engines Stabilized",1]]],
+["Threshold",[["PF","Positioned to Land in TDZ",1]]],
+["At Touchdown",[["PF","Verify Thrust Levers Idle",1],["PM","Verify Ground Spoilers Deployed",1],["PM","“Spoilers Up”"],["PF","Select Reverse",1]]],
+["80 Knots",[["PM","“80 Knots”"],["PF","Reduce Reverse Toward Idle",1]]],
+["Prior to Taxi Speed",[["PF","Disengage Autobrake",1],["PF","Stow Reversers",1]]],
+["Clear of Active",[["PF","Disarm Spoilers",1],["CA","“After Landing Checklist”"],["PM","Complete After Landing Checklist",1]]]
 ]},
 {id:"P-ga",name:"350 Go-Around and Rejected Landing",img:"img/profiles/nrm-go-around.jpg",nodes:[
 ["Initiation",[["PF","Select TOGA",1],["PF","“Go-Around”"],["PF","“Flaps”"],["PM","Select Flaps 3",1],["PM","“SRS Verified”"]]],
