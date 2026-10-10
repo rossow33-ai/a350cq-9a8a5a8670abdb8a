@@ -81,6 +81,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .chip{display:inline-block;font-size:.82rem;line-height:1.25;padding:6px 9px;border-radius:12px;max-width:100%;text-align:left;font-weight:600;color:#14233c}
 .chip.say.cpf{background:#fde8eb;border-bottom-right-radius:3px}.chip.say.cpm{background:#e6eef9;border-bottom-left-radius:3px}
 .chip.act{background:#fff;border:1.5px dashed #9aa6b8;font-weight:500;font-style:italic;color:#3a4b66}
+.rl{font-size:.62rem;font-weight:800;font-style:normal;letter-spacing:.04em;color:#c8102e}.cpm .rl{color:#4a6fa5}
+.tdivr{position:relative;z-index:1;text-align:center;margin:10px 0}.tdivr span{background:#fff;font-size:.68rem;font-weight:700;color:#9aa6b8;padding:2px 8px;border:1px dashed #c9d3e3;border-radius:6px}
 .tlr.ln .chip{animation:fi .35s ease}
 .backlink{align-self:flex-start;background:none;border:0;color:#cfe0ff;font-size:1rem;padding:8px 0;cursor:pointer;margin-bottom:-6px}
 .pl{display:flex;gap:10px;align-items:baseline;padding:5px 0;color:#14233c;font-weight:600}.pl .role{flex:none;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:5px;color:#fff;min-width:30px;text-align:center}.role.rpf{background:#c8102e}.role.rpm{background:#4a6fa5}.pl.act .ptx{font-weight:500;font-style:italic;color:#3a4b66}.hr{background:#d98a1c;padding:20px 0;font-size:1.15rem}.ht{background:#c8102e}#homeResume{margin-top:-8px}
@@ -113,7 +115,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010z";
+const APPV="v20261011a";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -147,6 +149,15 @@ const PROFILES=[
 ["F-Speed",[["PF","“Flaps 1”"],["PM","Select Flaps 1",1]]],
 ["S-Speed",[["PF","“Flaps Up, After Takeoff Checklist”"],["PM","Select Flaps Up",1],["PM","Complete After Takeoff Checklist",1]]]
 ]},
+{id:"P-rto",name:"350 Rejected Takeoff",img:"img/profiles/rto-rejected-takeoff.jpg",nodes:[
+["Takeoff",[["PF","Set Thrust",1],["PF","“Flex”"],["PM","“Man Flex”"]]],
+["80 Knots",[["PM","“80 Knots, Thrust Normal”"]]],
+{div:"Low Speed Regime ▲ · ▼ High Speed Regime"},
+["RTO Initiation",[["CA","“Abort, I have the A/C”"],["CA","Close Thrust Levers",1],["CA","Apply Max Braking/Verify Max Autobrakes",1],["CA","Apply Max Reverse",1],["FO","“Spoilers Up”"]]],
+["80 Knots",[["FO","“80 Knots”"]]],
+["Stopping Assured",[["FO","Notify Tower",1]]],
+["A/C Stopped",[["CA","Passenger PA",1],["CA","Call for ECAM/QRH as Required",1],["FO","Complete ECAM/QRH as Required",1],["CA","Call for Post RTO Considerations",1]]]
+]},
 {id:"P-efav1",name:"350 Engine Failure After V1",img:"img/profiles/emg-engine-failure-after-v1.jpg",nodes:[
 ["Takeoff",[["PF","Set Thrust",1],["PF","“Flex Set”"],["PM","“Man Flex”"]]],
 ["80 Knots",[["PM","“80 Knots, Thrust Normal”"]]],
@@ -160,7 +171,7 @@ const PROFILES=[
 ["At Green Dot",[["PF","Select Open Climb",1],["PF","“Open Climb”"],["PM","“Open Climb”"],["PF","Select MCT",1],["PF","“MCT”"],["PM","“Thrust MCT”"]]]
 ]}
 ];
-const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
+const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.filter(n=>Array.isArray(n)).flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
 const DECKS={lim:{title:"Limitations & Memory Items",cards:LIM,key:"recurrentFC_v2",tkey:"recurrentFC_test",back:"sectionView"},
 prof:{title:"Profiles",cards:PROFILES.map(p=>profCard(p)),key:"recurrentFC_v2__prof",tkey:"recurrentFC_test__prof"}};
 let C=LIM,deckId="lim";
@@ -210,10 +221,10 @@ function rowHTML(r,reveal){const H='<span class="hid"></span>';if(r[0]=="p")retu
 if(r[0]=="n")return '<div class="nt">'+(reveal?esc(r[1]).replace(/\n/g,"<br>"):H)+'</div>';
 if(r[0]=="f"||r[0]=="v")return '<div class="flow">'+(reveal?esc(r[1]):H)+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+(reveal?esc(r[1]):H)+'</span></div>'}
-function tlHTML(c,n){let h='<div class="tl"><div class="tlh"><span>PF</span><span></span><span>PM</span></div>',k=0;
-for(const [node,lines] of c.nodes){if(k>=n)break;const em=/failure|fire|warning|stall/i.test(node);h+='<div class="tln"><span class="pill'+(em?' em':'')+'">'+esc(node)+'</span></div>';
-for(const l of lines){if(k>=n)break;k++;const chip='<span class="chip '+(l[2]?'act':'say')+(l[0]=="PF"?' cpf':' cpm')+'">'+(l[2]?'▢ ':'')+esc(l[1])+'</span>';
-h+='<div class="tlr'+(k==n?' ln':'')+'"><div class="tc l">'+(l[0]=="PF"?chip:'')+'</div><div class="tdot"></div><div class="tc r">'+(l[0]=="PM"?chip:'')+'</div></div>'}}
+function tlHTML(c,n){const mix=c.nodes.some(x=>Array.isArray(x)&&x[1].some(l=>l[0]=="CA"||l[0]=="FO"));let h='<div class="tl"><div class="tlh"><span>'+(mix?"PF / CA":"PF")+'</span><span></span><span>'+(mix?"PM / FO":"PM")+'</span></div>',k=0;
+for(const nd of c.nodes){if(k>=n)break;if(!Array.isArray(nd)){if(k>0)h+='<div class="tdivr"><span>'+esc(nd.div)+'</span></div>';continue}const [node,lines]=nd;const em=/failure|fire|warning|stall/i.test(node);h+='<div class="tln"><span class="pill'+(em?' em':'')+'">'+esc(node)+'</span></div>';
+for(const l of lines){if(k>=n)break;k++;const L=l[0]=="PF"||l[0]=="CA";const chip='<span class="chip '+(l[2]?'act':'say')+(L?' cpf':' cpm')+'">'+(mix?'<b class="rl">'+l[0]+'</b> ':'')+(l[2]?'▢ ':'')+esc(l[1])+'</span>';
+h+='<div class="tlr'+(k==n?' ln':'')+'"><div class="tc l">'+(L?chip:'')+'</div><div class="tdot"></div><div class="tc r">'+(L?'':chip)+'</div></div>'}}
 return h+'</div>'}
 function cardLog(c,idx,n,steps,r){if(c.nodes){return '<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>'+(n>0?tlHTML(c,n):'')}let h='<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>';
 steps.forEach((s,i)=>{if(i>=n)return;s.conds.forEach(x=>h+='<div class="cond">'+esc(x)+'</div>');h+='<div class="ln">'+rowHTML(s.r,true)+'</div>'});return h}
