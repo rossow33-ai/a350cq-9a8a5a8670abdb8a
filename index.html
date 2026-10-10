@@ -2,8 +2,9 @@
 <title>A350 Recurrent Flashcards</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(160deg,#0b1d3a,#13315c);color:#eef3fb;min-height:100vh}
-header{padding:18px 16px 6px;text-align:center}h1{margin:0;font-size:1.4rem}header p{margin:4px 0 0;opacity:.7;font-size:.85rem}
-.wrap{max-width:680px;margin:0 auto;padding:12px 16px 40px}
+header{padding:14px 16px 6px;text-align:center}h1{margin:0;font-size:1.3rem}header p{margin:4px 0 0;opacity:.7;font-size:.82rem}
+.who{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px;font-size:.85rem}.who button{background:#ffffff22;color:#fff;border:0;border-radius:8px;padding:5px 10px;cursor:pointer}
+.wrap{max-width:680px;margin:0 auto;padding:10px 16px 40px}.hide{display:none!important}
 .filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
 .chip{border:1px solid #4a6fa5;background:transparent;color:#cfe0ff;padding:6px 12px;border-radius:999px;font-size:.8rem;cursor:pointer}.chip.on{background:#c8102e;border-color:#c8102e;color:#fff}
 .stats{display:flex;justify-content:space-between;font-size:.85rem;opacity:.85;margin:8px 2px}
@@ -12,23 +13,40 @@ header{padding:18px 16px 6px;text-align:center}h1{margin:0;font-size:1.4rem}head
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;color:#14233c;border-radius:16px;padding:22px;display:flex;flex-direction:column;box-shadow:0 10px 30px #0006;overflow:auto}
 .back{transform:rotateY(180deg);background:#f3fbf6}.tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#c8102e;font-weight:700}
 .txt{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.2rem;line-height:1.45;white-space:pre-line}.back .txt{font-weight:600;color:#0d5a2f}
-.hint{text-align:center;font-size:.72rem;opacity:.5}.status{position:absolute;top:16px;right:18px;font-size:.72rem;font-weight:700}
+.hint{text-align:center;font-size:.72rem;opacity:.55}.lvl{position:absolute;top:16px;right:18px;font-size:.72rem;font-weight:700;color:#4a5d7a}
 .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 button.b{flex:1;min-width:90px;padding:12px;border:0;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;background:#ffffff1f;color:#fff}
-button.known{background:#2e9e5b}button.review{background:#d98a1c}
+.rate{margin-top:10px;text-align:center}.rate p{margin:0 0 6px;font-size:.85rem;opacity:.85}.rate .row{flex-wrap:nowrap}
+.rate button{flex:1;padding:14px 0;border:0;border-radius:10px;color:#fff;font-size:1.2rem;font-weight:800;cursor:pointer}
+.r1{background:#d7263d}.r2{background:#f46036}.r3{background:#e2b100}.r4{background:#7cb518}.r5{background:#1b998b}
+.rate small{display:flex;justify-content:space-between;font-size:.7rem;opacity:.7;margin-top:4px}
 .src{margin-top:18px;font-size:.8rem}.src summary{cursor:pointer;opacity:.8}.src img{width:100%;border-radius:8px;margin-top:8px;background:#fff}
+#login{text-align:center;padding-top:20px}#login h2{font-size:1.1rem;font-weight:600}
+.dots{display:flex;gap:12px;justify-content:center;margin:18px 0}.dots span{width:18px;height:18px;border-radius:50%;border:2px solid #cfe0ff}.dots span.f{background:#cfe0ff}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:320px;margin:0 auto}
+.pad button{font-size:1.8rem;padding:18px 0;border-radius:16px;border:0;background:#ffffff1f;color:#fff;cursor:pointer}.pad button:active{background:#ffffff40}
+.pad .ent{background:#2e9e5b}.pad .ent:disabled{opacity:.35}.err{color:#ff9a9a;min-height:1.2em;font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px}td,th{padding:6px;border-bottom:1px solid #ffffff22;text-align:left;vertical-align:top}
+.pill{display:inline-block;min-width:34px;text-align:center;border-radius:6px;padding:2px 6px;font-weight:700;color:#fff}
 </style></head><body>
-<header><h1>✈️ A350 Recurrent Flashcards</h1><p>Limitations &amp; Memory Items · Systems Validation (slides 6, 8, 9, 10)</p></header>
+<header><h1>✈️ A350 Recurrent Flashcards</h1><p>Limitations &amp; Memory Items · Systems Validation (slides 6, 8, 9, 10)</p>
+<div class="who hide" id="who"><span>PPR <b id="pprShow"></b></span><button id="statsBtn">📊 Stats</button><button id="logout">Switch PPR</button></div></header>
 <div class="wrap">
+<section id="login"><h2>Enter your 6-digit PPR</h2><div class="dots" id="dots"></div><div class="err" id="err"></div>
+<div class="pad" id="pad"></div></section>
+<section id="deckView" class="hide">
 <div class="filters" id="filters"></div>
 <div class="stats"><span id="pos"></span><span id="prog"></span></div><div class="bar"><i id="barfill"></i></div>
 <div class="scene" id="scene"><div class="card" id="card">
-<div class="face front"><span class="tag" id="tagF"></span><span class="status" id="st"></span><div class="txt" id="q"></div><div class="hint">Tap card to flip · Space / ← →</div></div>
-<div class="face back"><span class="tag" id="tagB"></span><div class="txt" id="a"></div><div class="hint">Tap to flip back</div></div></div></div>
-<div class="row"><button class="b" id="prev">◀ Prev</button><button class="b" id="shuf">🔀 Shuffle</button><button class="b" id="next">Next ▶</button></div>
-<div class="row"><button class="b review" id="rev">↻ Review</button><button class="b known" id="kn">✓ Known</button></div>
-<div class="row"><button class="b" id="onlyrev">Show only unknown: off</button><button class="b" id="reset">Reset progress</button></div>
+<div class="face front"><span class="tag" id="tagF"></span><span class="lvl" id="lvl"></span><div class="txt" id="q"></div><div class="hint">Tap card to flip · Space</div></div>
+<div class="face back"><span class="tag" id="tagB"></span><div class="txt" id="a"></div><div class="hint">Rate below · keys 1–5</div></div></div></div>
+<div class="rate hide" id="rate"><p>How well did you know this?</p><div class="row">
+<button class="r1" data-r="1">1</button><button class="r2" data-r="2">2</button><button class="r3" data-r="3">3</button><button class="r4" data-r="4">4</button><button class="r5" data-r="5">5</button></div>
+<small><span>Not at all</span><span>Perfectly</span></small></div>
+<div class="row"><button class="b" id="flipBtn">Flip</button><button class="b" id="skip">Skip ▶</button></div>
 <details class="src" id="srcbox"><summary>View source slide</summary><img id="srcimg" alt="Source slide"></details>
+</section>
+<section id="statsView" class="hide"><div class="row"><button class="b" id="back">◀ Back to cards</button></div><div id="statsBody"></div></section>
 </div>
 <script>
 const T={6:"Limitations",8:"Loss of Braking / Emer Descent",9:"Unreliable Airspeed / Stall at Liftoff",10:"Evacuation Flow"};
@@ -60,24 +78,42 @@ const C=[
 [10,"EVACUATION – Why memorize the evacuation flow/philosophy?","In case the checklist cannot be read due to smoke/fire, darkness, injury or incapacitation – it leads the pilot through all critical tasks for the safest possible evacuation."],
 [10,"EVACUATION – Are the flow items included in the Evacuation checklist?","No – they refresh the logical pattern of procedures needed for a successful evacuation; the checklist follows the flow pattern."]
 ].map((c,i)=>({id:i,s:c[0],q:c[1],a:c[2]}));
-const K="recurrentFC_v1";let st={};try{st=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
-let filt="all",onlyRev=false,deck=[],i=0;const $=id=>document.getElementById(id);
-function build(){deck=C.filter(c=>(filt=="all"||c.s==filt)&&(!onlyRev||st[c.id]!="k"));i=Math.min(i,Math.max(0,deck.length-1));show()}
-function show(){$("card").classList.remove("flip");const pool=C.filter(c=>filt=="all"||c.s==filt),kn=pool.filter(c=>st[c.id]=="k").length;
-$("prog").textContent=kn+"/"+pool.length+" known";$("barfill").style.width=(pool.length?kn/pool.length*100:0)+"%";
-if(!deck.length){$("q").textContent="🎉 All cards in this set are marked known!";$("a").textContent="";$("pos").textContent="0/0";$("tagF").textContent=$("tagB").textContent=$("st").textContent="";return}
-const c=deck[i];$("pos").textContent="Card "+(i+1)+" / "+deck.length;$("tagF").textContent=$("tagB").textContent="Slide "+c.s+" · "+T[c.s];
-$("q").textContent=c.q;$("a").textContent=c.a;$("st").textContent=st[c.id]=="k"?"✓ KNOWN":st[c.id]=="r"?"↻ REVIEW":"";$("st").style.color=st[c.id]=="k"?"#2e9e5b":"#d98a1c";
-$("srcbox").style.display=c.s==6?"none":"";$("srcimg").src="img/slide"+c.s+".png"}
-const mv=d=>{if(deck.length){i=(i+d+deck.length)%deck.length;show()}};
-function mark(v){if(!deck.length)return;st[deck[i].id]=v;save();if(onlyRev&&v=="k"){build()}else mv(1)}
-const fl=$("filters");[["all","All"],...Object.entries(T)].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=k=="all"?v:"S"+k+": "+v;b.onclick=()=>{filt=k;i=0;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");build()};fl.appendChild(b)});
-$("scene").onclick=()=>$("card").classList.toggle("flip");$("prev").onclick=()=>mv(-1);$("next").onclick=()=>mv(1);
-$("shuf").onclick=()=>{for(let j=deck.length-1;j>0;j--){const r=Math.floor(Math.random()*(j+1));[deck[j],deck[r]]=[deck[r],deck[j]]}i=0;show()};
-$("kn").onclick=()=>mark("k");$("rev").onclick=()=>mark("r");
-$("onlyrev").onclick=e=>{onlyRev=!onlyRev;e.target.textContent="Show only unknown: "+(onlyRev?"on":"off");i=0;build()};
-$("reset").onclick=()=>{if(confirm("Reset all progress?")){st={};save();build()}};
-document.addEventListener("keydown",e=>{if(e.key=="ArrowRight")mv(1);else if(e.key=="ArrowLeft")mv(-1);else if(e.key==" "){e.preventDefault();$("card").classList.toggle("flip")}else if(e.key=="k")mark("k");else if(e.key=="r")mark("r")});
-build();
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const COL=["#888","#d7263d","#f46036","#e2b100","#7cb518","#1b998b"];
+let ppr=null,data=null,filt="all",cur=null,last=null,flipped=false,entry="";
+const key=p=>"recurrentFC_ppr_"+p;
+function load(p){let d;try{d=JSON.parse(localStorage.getItem(key(p)))}catch(e){}return d&&d.hist?d:{hist:{}}}
+function save(){try{localStorage.setItem(key(ppr),JSON.stringify(data))}catch(e){}}
+function todayRating(id){const h=data.hist[id]||[],t=today();for(let k=h.length-1;k>=0;k--)if(h[k].d==t)return h[k].r;return null}
+function avg(id){const h=data.hist[id]||[];return h.length?h.reduce((s,x)=>s+x.r,0)/h.length:null}
+function weight(c){const r=todayRating(c.id)??avg(c.id);return r==null?36:Math.pow(6-r,2)}
+function pool(){return C.filter(c=>filt=="all"||c.s==filt)}
+function pick(){const p=pool();let cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
+function show(){cur=pick();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("hide");
+const p=pool(),done=p.filter(c=>todayRating(c.id)!=null).length;$("pos").textContent="Rated today: "+done+"/"+p.length;
+const ta=p.map(c=>todayRating(c.id)).filter(x=>x!=null);$("prog").textContent=ta.length?"Today's avg "+(ta.reduce((a,b)=>a+b,0)/ta.length).toFixed(1):"";
+$("barfill").style.width=(p.length?done/p.length*100:0)+"%";
+$("tagF").textContent=$("tagB").textContent="Slide "+cur.s+" · "+T[cur.s];$("q").textContent=cur.q;$("a").textContent=cur.a;
+const av=avg(cur.id),tr=todayRating(cur.id);$("lvl").textContent=(tr!=null?"Today "+tr+" · ":"")+(av!=null?"All-time avg "+av.toFixed(1):"New card");
+$("srcbox").style.display=cur.s==6?"none":"";$("srcbox").open=false;$("srcimg").src="img/slide"+cur.s+".png"}
+function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("rate").classList.toggle("hide",!flipped)}
+function rate(r){if(!flipped||!cur)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});save();last=cur;show()}
+function stats(){const rows=C.map(c=>{const av=avg(c.id),tr=todayRating(c.id),n=(data.hist[c.id]||[]).length;
+const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
+return "<tr><td>S"+c.s+"</td><td>"+c.q.replace(/</g,"&lt;")+"</td><td>"+pill(tr)+"</td><td>"+pill(av)+"</td><td>"+n+"</td></tr>"}).join("");
+$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+rows+"</table>"}
+function view(v){["login","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v));$("who").classList.toggle("hide",v=="login")}
+function drawDots(){$("dots").innerHTML=Array.from({length:6},(_,i)=>'<span class="'+(i<entry.length?"f":"")+'"></span>').join("");$("pad").querySelector(".ent").disabled=entry.length!=6}
+function press(k){$("err").textContent="";if(k=="⌫")entry=entry.slice(0,-1);else if(k=="⏎"){if(entry.length!=6){$("err").textContent="PPR must be 6 digits";return}login(entry)}else if(entry.length<6)entry+=k;drawDots()}
+function login(p){ppr=p;data=load(p);try{localStorage.setItem("recurrentFC_lastPPR",p)}catch(e){}$("pprShow").textContent=p;entry="";last=null;view("deckView");show()}
+function logout(){ppr=null;data=null;entry="";try{localStorage.removeItem("recurrentFC_lastPPR")}catch(e){}drawDots();view("login")}
+["1","2","3","4","5","6","7","8","9","⌫","0","⏎"].forEach(k=>{const b=document.createElement("button");b.textContent=k;if(k=="⏎")b.className="ent";b.onclick=()=>press(k);$("pad").appendChild(b)});
+const fl=$("filters");[["all","All"],...Object.entries(T)].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=k=="all"?v:"S"+k+": "+v;b.onclick=()=>{filt=k;last=null;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");show()};fl.appendChild(b)});
+$("scene").onclick=flip;$("flipBtn").onclick=flip;$("skip").onclick=()=>{last=cur;show()};
+document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
+$("logout").onclick=logout;$("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
+document.addEventListener("keydown",e=>{if(!ppr){if(/^[0-9]$/.test(e.key))press(e.key);else if(e.key=="Backspace")press("⌫");else if(e.key=="Enter")press("⏎");return}
+if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();flip()}else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
+drawDots();let lp=null;try{lp=localStorage.getItem("recurrentFC_lastPPR")}catch(e){}if(lp&&/^\d{6}$/.test(lp))login(lp);
 </script></body></html>
