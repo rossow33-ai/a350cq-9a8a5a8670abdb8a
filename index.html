@@ -50,8 +50,15 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .nt{color:#3a4b66;font-weight:400;margin:8px 0;font-size:.88rem}
 .flow{text-align:center;font-weight:800;color:#0d5a2f;font-size:1.15rem;line-height:1.7;margin:4px 0}
 .front .txt{font-weight:600}
+#testBadge{background:#c8102e;color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.08em;padding:4px 8px;border-radius:6px}
+.tq{font-weight:700;font-size:1.05rem;color:#14233c;margin-bottom:6px;white-space:pre-line}
+.tp{font-size:.72rem;color:#9aa6b8;font-weight:700;margin-bottom:6px}
+.hid{display:inline-block;min-width:70px;height:1.2em;background:#e3e8f0;border-radius:6px;vertical-align:middle}
+.cur{background:#fff6d6;border-radius:8px;padding-left:6px;padding-right:6px;margin:0 -6px}
+.thint{text-align:center;font-size:.75rem;color:#9aa6b8;margin-top:10px}
+#tview{display:block;text-align:left;font-size:.95rem;line-height:1.35;overflow:auto}
 </style></head><body>
-<header><h1>✈️ A350 Recurrent</h1><div id="who"><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
+<header><h1>✈️ A350 Recurrent</h1><div id="who"><span id="testBadge" class="hide">TEST</span><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
 <div class="bar" id="barwrap"><i id="barfill"></i></div>
 <main>
 
@@ -65,13 +72,13 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <section id="statsView" class="hide"><button class="mi" id="back">← Back to cards</button><h2>Your progress</h2><div id="statsBody"></div></section>
 </main>
 <div id="menu" class="hide"><div class="panel">
-<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="statsBtn">📊  Stats</button>
-<div class="mh">Topic</div><div id="filters"></div>
+<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="testBtn">🧪  Test mode: OFF</button><button class="mi" id="statsBtn">📊  Stats</button>
+
 <div class="mh" id="pos"></div><div class="mh" id="prog" style="margin-top:0"></div>
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010b";
+const APPV="v20261010d";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -96,6 +103,7 @@ const esc=x=>String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const COL=["#888","#d7263d","#f46036","#e2b100","#7cb518","#1b998b"];
 const KEY="recurrentFC_v2";
+let testMode=false,steps=[],tIdx=0,tRev=false;
 let data,filt="all",cur=null,last=null,flipped=false;
 function load(){let d;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}return d&&d.hist?d:{hist:{}}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
@@ -108,11 +116,25 @@ function backHTML(c){return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+
 if(r[0]=="c")return '<div class="cond">'+esc(r[1])+'</div>';if(r[0]=="n")return '<div class="nt">'+esc(r[1]).replace(/\n/g,"<br>")+'</div>';
 if(r[0]=="f")return '<div class="flow">'+esc(r[1])+'</div>';if(r[0]=="v")return '<div class="flow">'+esc(r[1])+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+esc(r[1])+'</span></div>'}).join("")}
+function mkSteps(c){const st=[];let pend=[];c.b.forEach(r=>{if(r[0]=="c"){pend.push(r[1]);return}st.push({conds:pend,r});pend=[]});return st}
+function rowHTML(r,reveal){const H='<span class="hid"></span>';
+if(r[0]=="n")return '<div class="nt">'+(reveal?esc(r[1]).replace(/\n/g,"<br>"):H)+'</div>';
+if(r[0]=="f"||r[0]=="v")return '<div class="flow">'+(reveal?esc(r[1]):H)+'</div>';
+return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+(reveal?esc(r[1]):H)+'</span></div>'}
+function renderTest(){let h='<div class="tq">'+esc(cur.q)+'</div>';
+if(tIdx<0){h+='<div class="thint">Tap to start · '+steps.length+' line'+(steps.length>1?'s':'')+'</div>'}else{
+h='<div class="tp">Line '+(tIdx+1)+'/'+steps.length+'</div>'+h;
+steps.forEach((s,i)=>{if(i>tIdx)return;s.conds.forEach(c=>h+='<div class="cond">'+esc(c)+'</div>');const rv=i<tIdx||tRev;h+=i==tIdx?'<div class="cur">'+rowHTML(s.r,rv)+'</div>':rowHTML(s.r,rv)});
+const done=tIdx==steps.length-1&&tRev;h+='<div class="thint">'+(done?'Complete — rate yourself below':tRev?'Tap for next line':'Tap to reveal')+'</div>';
+$("rate").classList.toggle("off",!done);$("ratelbl").style.visibility=done?"":"hidden";flipped=done}
+$("q").innerHTML=h;const cl=$("q").querySelector(".cur");if(cl&&cl.scrollIntoView)cl.scrollIntoView({block:"nearest"})}
+function testTap(){if(tIdx<0){tIdx=0;tRev=false}else if(!tRev)tRev=true;else if(tIdx<steps.length-1){tIdx++;tRev=false}renderTest()}
 function show(){cur=pick();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";
 const p=pool(),done=p.filter(c=>todayRating(c.id)!=null).length;$("pos").textContent="Rated today: "+done+"/"+p.length;
 const ta=p.map(c=>todayRating(c.id)).filter(x=>x!=null);$("prog").textContent=ta.length?"Today avg "+(ta.reduce((a,b)=>a+b,0)/ta.length).toFixed(1):"";
 $("barfill").style.width=(p.length?done/p.length*100:0)+"%";
 $("tagF").textContent=$("tagB").textContent="Slide "+cur.s+" · "+T[cur.s];$("q").textContent=cur.q;$("a").innerHTML=backHTML(cur);$("a").scrollTop=0;
+if(testMode){steps=mkSteps(cur);tIdx=-1;tRev=false;$("q").id="q";$("q").classList.remove("txt");$("q").classList.add("list");renderTest()}else{$("q").classList.add("txt");$("q").classList.remove("list")}
 const av=avg(cur.id);$("lvl").textContent=av!=null?"avg "+av.toFixed(1):"New card";
 $("srcBtn").style.display=cur.s==6?"none":""}
 function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("rate").classList.toggle("off",!flipped);$("ratelbl").style.visibility=flipped?"":"hidden"}
@@ -121,13 +143,14 @@ function stats(){const pill=v=>v==null?"–":'<span class="pill" style="backgrou
 $("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>"<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>").join("")+"</table>"}
 function view(v){$("menu").classList.add("hide");["deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
 const closeMenu=()=>$("menu").classList.add("hide");
-const fl=$("filters");[["all","All topics"],["6","Limitations (slide 6)"],["8","Loss of Braking / Emer Descent (slide 8)"],["9","Unreliable Airspeed / Stall (slide 9)"],["10","Evacuation flow (slide 10)"]].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=v;b.onclick=()=>{filt=k;last=null;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");view("deckView");show()};fl.appendChild(b)});
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
 $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src="img/slide"+cur.s+".png?v=3";$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
-$("scene").onclick=flip;$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();last=cur;show()};
+$("scene").onclick=()=>testMode?testTap():flip();$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();last=cur;show()};
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
+function setTest(on){testMode=on;try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
+$("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
 $("reset").onclick=()=>{if(confirm("Reset all ratings and history on this device?")){data={hist:{}};save();closeMenu();show()}};
-document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();flip()}else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
-data=load();show();
+document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();testMode?testTap():flip()}else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
+data=load();let md=null;try{md=localStorage.getItem("recurrentFC_mode")}catch(e){}if(md=="test")setTest(true);else show();
 </script></body></html>
