@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f2444"><title>A350 Recurrent</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="theme-color" content="#0f2444"><title>A350 Recurrent</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{height:100%}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0f2444;color:#eef3fb;display:flex;flex-direction:column}
@@ -42,15 +42,23 @@ main{flex:1;display:flex;flex-direction:column;max-width:640px;width:100%;margin
 table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;border-bottom:1px solid #ffffff14;text-align:left;vertical-align:top}th{opacity:.5;font-weight:500}
 .pill{display:inline-block;min-width:32px;text-align:center;border-radius:6px;padding:2px 6px;font-weight:700;color:#fff}
 #back{margin-bottom:12px}
+.list{display:block;text-align:left;font-size:.95rem;line-height:1.35;padding:10px 0}
+.ttl{font-weight:700;color:#14233c;font-size:1.05rem;margin-bottom:8px}
+.cond{font-weight:700;color:#c8102e;margin:12px 0 4px;font-size:.88rem}
+.it{display:flex;align-items:baseline;gap:6px;padding:6px 0;color:#14233c}
+.it b{font-weight:600}.it .dl{flex:1;border-bottom:2px dotted #b8c2d2;min-width:12px}.it .ac{font-weight:800;color:#0d5a2f;text-align:right;max-width:55%}
+.nt{color:#3a4b66;font-weight:400;margin:8px 0;font-size:.88rem}
+.flow{text-align:center;font-weight:800;color:#0d5a2f;font-size:1.15rem;line-height:1.7;margin:4px 0}
+.front .txt{font-weight:600}
 </style></head><body>
-<header><h1>✈️ A350 Recurrent</h1><div id="who" class="hide"><span id="pprShow"></span><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
-<div class="bar hide" id="barwrap"><i id="barfill"></i></div>
+<header><h1>✈️ A350 Recurrent</h1><div id="who"><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
+<div class="bar" id="barwrap"><i id="barfill"></i></div>
 <main>
-<section id="login"><h2>Enter PPR</h2><div class="dots" id="dots"></div><div class="err" id="err"></div><div class="pad" id="pad"></div></section>
-<section id="deckView" class="hide">
+
+<section id="deckView">
 <div class="scene" id="scene"><div class="card" id="card">
 <div class="face front"><span class="tag" id="tagF"></span><div class="txt" id="q"></div><span id="lvl" class="hide"></span></div>
-<div class="face back"><span class="tag" id="tagB"></span><div class="txt" id="a"></div><div class="foot"><span></span><button class="srcbtn" id="srcBtn" title="View source slide">🖼️</button></div></div></div></div>
+<div class="face back"><span class="tag" id="tagB"></span><div class="txt list" id="a"></div><div class="foot"><span></span><button class="srcbtn" id="srcBtn" title="View source slide">🖼️</button></div></div></div></div>
 <div class="rate off" id="rate"><button class="r1" data-r="1">1</button><button class="r2" data-r="2">2</button><button class="r3" data-r="3">3</button><button class="r4" data-r="4">4</button><button class="r5" data-r="5">5</button></div>
 <div class="ratelbl" id="ratelbl"><span>Not at all</span><span>Perfectly</span></div>
 </section>
@@ -60,76 +68,63 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="statsBtn">📊  Stats</button>
 <div class="mh">Topic</div><div id="filters"></div>
 <div class="mh" id="pos"></div><div class="mh" id="prog" style="margin-top:0"></div>
-<button class="mi" id="logout" style="margin-top:auto">⇄  Switch PPR</button></div></div>
+<button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const T={6:"Limitations",8:"Loss of Braking / Emer Descent",9:"Unreliable Airspeed / Stall at Liftoff",10:"Evacuation Flow"};
+const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
+// back rows: ["c",cond] condition, [item,action] checklist line, ["n",text] note, ["f",text] flow line, ["v",text] single value
 const C=[
-[6,"Maximum Operating Altitude?","43,100′"],
-[6,"Maximum takeoff and landing tailwind component?","15 knots, or as restricted by Delta Company Pages"],
-[6,"Crosswind limit for takeoff, including gusts?","35 knots"],
-[6,"Crosswind limit for landing, including gusts?","40 knots"],
-[6,"On takeoff, the autopilot must not be engaged until at least ____ after lift-off.","5 seconds"],
-[6,"After a manual go-around, the autopilot must not be engaged below a minimum altitude of ____.","100′ AGL"],
-[6,"Autoland wind limit – headwind?","40 knots"],
-[6,"Autoland wind limit – tailwind?","15 knots, or as restricted by Delta Company Pages"],
-[6,"Autoland wind limit – crosswind?","30 knots, including gusts\n(15 knots when operating below Cat I minimums)"],
-[6,"Flight Controls – Maximum Flap Extension Altitude?","20,000′"],
-[8,"LOSS OF BRAKING – If no braking: memory items?","REV ........ MAX\nBRAKE PEDALS ........ RELEASE\nA-SKID OFF ........ ORDER\nA-SKID ........ OFF\nBRAKE PEDALS ........ PRESS"],
-[8,"LOSS OF BRAKING – If still no braking?","PARK BRK ........ USE"],
-[8,"EMER DESCENT – If cabin pressure altitude is above 10,000 ft: memory items?","CREW OXY MASKS ........ USE\nSIGNS ........ ON\nEMER DESCENT ........ INITIATE"],
-[8,"EMER DESCENT – Initiate the emergency descent with one of which techniques?","• AUTO EMER DESCENT function\n• Selected guidance via the AFS CP"],
-[8,"EMER DESCENT – If A/THR is not active?","ALL THR LEVERS ........ IDLE\nSPEED BRAKES LEVER ........ FULL"],
-[9,"UNRELIABLE AIRSPEED – If safe conduct of the flight is impacted: first three items?","A/P ........ OFF\nA/THR ........ OFF\nFD ........ OFF"],
-[9,"UNRELIABLE AIRSPEED – Pitch/thrust below THR RED ALT?","12.5° / TOGA"],
-[9,"UNRELIABLE AIRSPEED – Pitch/thrust above THR RED ALT and below FL100?","10° / CLB"],
-[9,"UNRELIABLE AIRSPEED – Pitch/thrust above THR RED ALT and above FL100?","5° / CLB"],
-[9,"UNRELIABLE AIRSPEED – FLAPS if CONF 0 (1)(2)(3)?","MAINTAIN CURRENT CONF"],
-[9,"UNRELIABLE AIRSPEED – FLAPS if CONF FULL?","SELECT CONF 3 AND MAINTAIN"],
-[9,"UNRELIABLE AIRSPEED – Speed brakes and L/G?","SPEED BRAKES ........ CHECK RETRACTED\nL/G ........ UP"],
-[9,"STALL WARNING AT LIFTOFF – Immediate actions?","THRUST ........ TOGA\nAt the same time:\nPITCH ATTITUDE ........ 12.5°\nBANK ........ WINGS LEVEL"],
-[10,"EVACUATION – What is the flow pattern (in order)?","STOP\nCONFIGURE\nSHUTDOWN\nEVACUATE"],
-[10,"EVACUATION – Why memorize the evacuation flow/philosophy?","In case the checklist cannot be read due to smoke/fire, darkness, injury or incapacitation – it leads the pilot through all critical tasks for the safest possible evacuation."],
-[10,"EVACUATION – Are the flow items included in the Evacuation checklist?","No – they refresh the logical pattern of procedures needed for a successful evacuation; the checklist follows the flow pattern."]
-].map((c,i)=>({id:i,s:c[0],q:c[1],a:c[2]}));
+{id:"L-alt",s:6,q:"Maximum Operating Altitude",b:[["v","43,100′"]]},
+{id:"L-tw",s:6,q:"Maximum takeoff and landing tailwind component",b:[["v","15 knots, or as restricted by Delta Company Pages"]]},
+{id:"L-xwto",s:6,q:"Crosswind limit for takeoff, including gusts",b:[["v","35 knots"]]},
+{id:"L-xwld",s:6,q:"Crosswind limit for landing, including gusts",b:[["v","40 knots"]]},
+{id:"L-apto",s:6,q:"On takeoff, the autopilot must not be engaged until at least ____ after lift-off.",b:[["v","5 seconds"]]},
+{id:"L-apga",s:6,q:"After a manual go around, the autopilot must not be engaged below a minimum altitude of ____.",b:[["v","100′ AGL"]]},
+{id:"L-autoland",s:6,q:"Wind limits for autoland operations\n(headwind, tailwind, and crosswinds)",b:[["Headwind","40 knots"],["Tailwind","15 knots, or as restricted by Delta Company Pages"],["Crosswinds","30 knots, including gusts"],["n","(15 knots when operating below Cat I minimums)"]]},
+{id:"L-flap",s:6,q:"Flight Controls\nMaximum Flap Extension Altitude",b:[["v","20,000′"]]},
+{id:"M-brk",s:8,q:"1.2.1 Loss of Braking\nmemory items",b:[["c","If no braking:"],["REV","MAX"],["BRAKE PEDALS","RELEASE"],["A-SKID OFF","ORDER"],["A-SKID","OFF"],["BRAKE PEDALS","PRESS"],["c","If still no braking:"],["PARK BRK","USE"]]},
+{id:"M-ed",s:8,q:"1.2.2 Emer Descent\nmemory items",b:[["c","If the cabin pressure altitude is above 10,000 ft:"],["CREW OXY MASKS","USE"],["SIGNS","ON"],["EMER DESCENT","INITIATE"],["n","Initiate the emergency descent with one of the following techniques:\n- Use of the AUTO EMER DESCENT function\n- Use of selected guidance via the AFS CP."],["c","If A/THR is not active:"],["ALL THR LEVERS","IDLE"],["SPEED BRAKES LEVER","FULL"]]},
+{id:"M-uas",s:9,q:"1.2.3 Unreliable Air Speed Indication\nmemory items",b:[["c","If the safe conduct of the flight is impacted:"],["A/P","OFF"],["A/THR","OFF"],["FD","OFF"],["c","PITCH/THRUST:"],["Below THR RED ALT","12.5°/TOGA"],["Above THR RED ALT and Below FL 100","10°/CLB"],["Above THR RED ALT and Above FL 100","5°/CLB"],["FLAPS (if CONF 0(1)(2)(3))","MAINTAIN CURRENT CONF"],["FLAPS (if CONF FULL)","SELECT CONF 3 AND MAINTAIN"],["SPEED BRAKES","CHECK RETRACTED"],["L/G","UP"]]},
+{id:"M-stall",s:9,q:"1.2.4 Stall Warning at Liftoff\nmemory items",b:[["c","If stall warnings trigger at liftoff, apply the following immediate actions:"],["THRUST","TOGA"],["c","At the same time:"],["PITCH ATTITUDE","12.5°"],["BANK","WINGS LEVEL"]]},
+{id:"E-flow",s:10,q:"1.3 Emergency Evacuation\nflow / philosophy",b:[["n","The checklist follows the flow pattern of:"],["f","STOP"],["f","CONFIGURE"],["f","SHUTDOWN"],["f","EVACUATE"],["n","Evacuation flow items are not included within the Evacuation checklist. They are meant to refresh the logical pattern of procedures that must occur for a successful evacuation. In the unlikely event that the checklist cannot be read due to smoke/fire, darkness, injury or incapacitation, this simple flow or philosophy should be memorized and lead the pilot to completion of all critical tasks contributing to the safest possible evacuation."]]}
+];
 const $=id=>document.getElementById(id);
+const esc=x=>String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const COL=["#888","#d7263d","#f46036","#e2b100","#7cb518","#1b998b"];
-let ppr=null,data=null,filt="all",cur=null,last=null,flipped=false,entry="";
-const key=p=>"recurrentFC_ppr_"+p;
-function load(p){let d;try{d=JSON.parse(localStorage.getItem(key(p)))}catch(e){}return d&&d.hist?d:{hist:{}}}
-function save(){try{localStorage.setItem(key(ppr),JSON.stringify(data))}catch(e){}}
+const KEY="recurrentFC_v2";
+let data,filt="all",cur=null,last=null,flipped=false;
+function load(){let d;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}return d&&d.hist?d:{hist:{}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
 function todayRating(id){const h=data.hist[id]||[],t=today();for(let k=h.length-1;k>=0;k--)if(h[k].d==t)return h[k].r;return null}
 function avg(id){const h=data.hist[id]||[];return h.length?h.reduce((s,x)=>s+x.r,0)/h.length:null}
 function weight(c){const r=todayRating(c.id)??avg(c.id);return r==null?36:Math.pow(6-r,2)}
-function pool(){return C.filter(c=>filt=="all"||c.s==filt)}
-function pick(){const p=pool();let cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
+function pool(){return C.filter(c=>filt=="all"||String(c.s)==filt)}
+function pick(){const p=pool();const cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
+function backHTML(c){return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
+if(r[0]=="c")return '<div class="cond">'+esc(r[1])+'</div>';if(r[0]=="n")return '<div class="nt">'+esc(r[1]).replace(/\n/g,"<br>")+'</div>';
+if(r[0]=="f")return '<div class="flow">'+esc(r[1])+'</div>';if(r[0]=="v")return '<div class="flow">'+esc(r[1])+'</div>';
+return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+esc(r[1])+'</span></div>'}).join("")}
 function show(){cur=pick();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";
 const p=pool(),done=p.filter(c=>todayRating(c.id)!=null).length;$("pos").textContent="Rated today: "+done+"/"+p.length;
 const ta=p.map(c=>todayRating(c.id)).filter(x=>x!=null);$("prog").textContent=ta.length?"Today avg "+(ta.reduce((a,b)=>a+b,0)/ta.length).toFixed(1):"";
 $("barfill").style.width=(p.length?done/p.length*100:0)+"%";
-$("tagF").textContent=$("tagB").textContent="Slide "+cur.s+" · "+T[cur.s];$("q").textContent=cur.q;$("a").textContent=cur.a;
-const av=avg(cur.id),tr=todayRating(cur.id);$("lvl").textContent=av!=null?"avg "+av.toFixed(1):"New card";
-$("srcBtn").style.display=cur.s==6?"none":"";$("srcimg").src="img/slide"+cur.s+".png"}
+$("tagF").textContent=$("tagB").textContent="Slide "+cur.s+" · "+T[cur.s];$("q").textContent=cur.q;$("a").innerHTML=backHTML(cur);$("a").scrollTop=0;
+const av=avg(cur.id);$("lvl").textContent=av!=null?"avg "+av.toFixed(1):"New card";
+$("srcBtn").style.display=cur.s==6?"none":""}
 function flip(){flipped=!flipped;$("card").classList.toggle("flip",flipped);$("rate").classList.toggle("off",!flipped);$("ratelbl").style.visibility=flipped?"":"hidden"}
 function rate(r){if(!flipped||!cur)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});save();last=cur;show()}
-function stats(){const rows=C.map(c=>{const av=avg(c.id),tr=todayRating(c.id),n=(data.hist[c.id]||[]).length;
-const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
-return "<tr><td>S"+c.s+"</td><td>"+c.q.replace(/</g,"&lt;")+"</td><td>"+pill(tr)+"</td><td>"+pill(av)+"</td><td>"+n+"</td></tr>"}).join("");
-$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+rows+"</table>"}
-function view(v){$("menu").classList.add("hide");$("barwrap").classList.toggle("hide",v=="login");["login","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v));$("who").classList.toggle("hide",v=="login")}
-function drawDots(){$("dots").innerHTML=Array.from({length:6},(_,i)=>'<span class="'+(i<entry.length?"f":"")+'"></span>').join("");$("pad").querySelector(".ent").disabled=entry.length!=6}
-function press(k){$("err").textContent="";if(k=="⌫")entry=entry.slice(0,-1);else if(k=="⏎"){if(entry.length!=6){$("err").textContent="PPR must be 6 digits";return}login(entry)}else if(entry.length<6)entry+=k;drawDots()}
-function login(p){ppr=p;data=load(p);try{localStorage.setItem("recurrentFC_lastPPR",p)}catch(e){}$("pprShow").textContent=p;entry="";last=null;view("deckView");show()}
-function logout(){ppr=null;data=null;entry="";try{localStorage.removeItem("recurrentFC_lastPPR")}catch(e){}drawDots();view("login")}
-["1","2","3","4","5","6","7","8","9","⌫","0","⏎"].forEach(k=>{const b=document.createElement("button");b.textContent=k;if(k=="⏎")b.className="ent";b.onclick=()=>press(k);$("pad").appendChild(b)});
-const fl=$("filters");[["all","All"],...Object.entries(T)].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=k=="all"?"All topics":v;b.onclick=()=>{filt=k;last=null;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");closeMenu();view("deckView");show()};fl.appendChild(b)});
-const closeMenu=()=>$("menu").classList.add("hide");$("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
-$("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src="img/slide"+cur.s+".png";$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
+function stats(){const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
+$("statsBody").innerHTML="<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>"<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>").join("")+"</table>"}
+function view(v){$("menu").classList.add("hide");["deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
+const closeMenu=()=>$("menu").classList.add("hide");
+const fl=$("filters");[["all","All topics"],["6","Limitations (slide 6)"],["8","Loss of Braking / Emer Descent (slide 8)"],["9","Unreliable Airspeed / Stall (slide 9)"],["10","Evacuation flow (slide 10)"]].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k=="all"?" on":"");b.textContent=v;b.onclick=()=>{filt=k;last=null;[...fl.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");view("deckView");show()};fl.appendChild(b)});
+$("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
+$("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src="img/slide"+cur.s+".png?v=3";$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
 $("scene").onclick=flip;$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();last=cur;show()};
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
-$("logout").onclick=logout;$("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
-document.addEventListener("keydown",e=>{if(!ppr){if(/^[0-9]$/.test(e.key))press(e.key);else if(e.key=="Backspace")press("⌫");else if(e.key=="Enter")press("⏎");return}
-if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();flip()}else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
-drawDots();let lp=null;try{lp=localStorage.getItem("recurrentFC_lastPPR")}catch(e){}if(lp&&/^\d{6}$/.test(lp))login(lp);
+$("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
+$("reset").onclick=()=>{if(confirm("Reset all ratings and history on this device?")){data={hist:{}};save();closeMenu();show()}};
+document.addEventListener("keydown",e=>{if($("deckView").classList.contains("hide"))return;if(e.key==" "){e.preventDefault();flip()}else if(/^[1-5]$/.test(e.key))rate(+e.key);else if(e.key=="ArrowRight"){last=cur;show()}});
+data=load();show();
 </script></body></html>
