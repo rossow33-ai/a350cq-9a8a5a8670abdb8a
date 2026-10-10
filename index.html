@@ -121,7 +121,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011e";
+const APPV="v20261011f";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -209,9 +209,9 @@ let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null
 if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
 const nw=C.filter(c=>!(data.hist[c.id]||[]).length).length;$("insight").textContent=at5==C.length?"":!t.f.h.length?at5+"/"+C.length+" at 5 today · "+nw+" new":"Focus: "+shortName(t.c)+" — "+why+" · "+at5+"/"+C.length+" at 5"}
 function goalScreen(){cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
-$("q").classList.remove("txt");$("q").classList.add("list");const E=["🥳","🎉","🍻","🎊","🥂","🍾","✨","🙌","🕺","💃"];let hsh=0;for(const ch of today())hsh=(hsh*31+ch.charCodeAt(0))>>>0;const emo='<span>'+E[hsh%E.length]+'</span>';
+$("q").classList.remove("txt");$("q").classList.add("list");const E=["🥳","🎉","🍻","🎊","🥂","🍾","✨","🙌","🕺","💃"];let hsh=0;for(const ch of today())hsh=(hsh*31+ch.charCodeAt(0))>>>0;const emo='<span>⛵</span>';
 const nToday=C.reduce((n,c)=>n+(data.hist[c.id]||[]).filter(x=>x.d==today()).length,0);const all=C.flatMap(c=>data.hist[c.id]||[]);const allAvg=all.length?(all.reduce((a,x)=>a+x.r,0)/all.length).toFixed(1):"–";const lg=(data.grades||[]).slice(-1)[0];
-$("q").innerHTML='<div class="goal"><div class="party" role="img" aria-label="celebration">'+emo+'</div><h3>All cards at 5 today</h3><p>Every card rated 5 — nice work!</p>'+
+$("q").innerHTML='<div class="goal"><div class="party" role="img" aria-label="celebration">'+emo+'</div><div style="font-size:.9rem;opacity:.65;margin:-4px 0 10px">Sail away</div><p>Every card rated 5 — nice work!</p>'+
 '<div class="gstats"><div><b>'+C.length+'/'+C.length+'</b><span>at 5 today</span></div><div><b>'+nToday+'</b><span>ratings today</span></div><div><b>'+allAvg+'</b><span>all-time avg</span></div>'+(lg?'<div><b style="color:'+gcol(lg.g)+'">'+lg.g+'</b><span>last test</span></div>':'')+'</div>'+
 '<button class="rbtn" id="keep">Keep reviewing</button><button class="rbtn" id="goalHome" style="background:#14233c">⌂ Home</button></div>';
 $("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()};$("goalHome").onclick=e=>{e.stopPropagation();view("homeView")}}
