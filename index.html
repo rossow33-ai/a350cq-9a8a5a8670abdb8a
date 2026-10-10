@@ -122,7 +122,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011j";
+const APPV="v20261011k";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -193,6 +193,17 @@ const PROFILES=[
 ["100′ Above DA",[["AC","“Hundred Above”"]]],
 ["Minimums",[["CA","“APP LTS in Sight”"],["FO","“APP LTS in Sight”"],["AC","“Minimums”"]]],
 ["100′ Above TDZE",[["CA","“Runway in Sight”"],["FO","“Runway in Sight”"],["PF","Disengage Autopilot as Required",1]]]
+]},
+{id:"P-eop",name:"350 Engine-Out Precision Approach",img:"img/profiles/emg-engine-out-precision.jpg",nodes:[
+["On Vectors",[["PF","At Flaps 1",1]]],
+["Cleared for Approach",[["PF","Select APPR",1],["PF","“Approach”"],["PM","“Glide Slope, Localizer Armed”"],["PF","Select Second Autopilot",1],["PF","“Flaps 2”"],["PM","Select Flaps 2",1]]],
+["G/S Alive",[["PF","“Gear Down, Flaps 3”"],["PM","Select Gear Down, Flaps 3",1]]],
+["G/S Intercept",[["PF","“Flaps Full, Landing Checklist”"],["PM","Select Flaps Full",1],["PM","Complete Landing Checklist",1]]],
+["1000′ AGL",[["AC","“1000”"],["PM","“Cleared to Land, All Green”"]]],
+["500′ AGL",[["AC","“500”"]]],
+["100′ Above DA",[["AC","“Hundred Above”"]]],
+["Minimums",[["CA","“APP LTS in Sight”"],["FO","“APP LTS in Sight”"],["AC","“Minimums”"]]],
+["100′ Above TDZE",[["CA","“Runway in Sight”"],["FO","“Runway in Sight”"]]]
 ]},
 {id:"P-va",name:"350 Visual Approach",img:"img/profiles/nrm-visual-approach.jpg",nodes:[
 ["Downwind",[["PF","“Flaps 1”"],["PM","Select Flaps 1",1]]],
