@@ -58,6 +58,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .face .list{padding-bottom:28px}.rbtn{display:block;margin:18px auto 0;background:#c8102e;color:#fff;border:0;border-radius:12px;padding:14px 28px;font-size:1rem;font-weight:700;cursor:pointer}
 .tdiv{margin:22px 0 8px;padding-top:12px;border-top:2px solid #e3e8f0;font-size:.72rem;font-weight:700;color:#9aa6b8;letter-spacing:.05em}#q>.tdiv:first-child,#q>#curCard:first-child>.tdiv{border-top:0;margin-top:0;padding-top:0}
 .ln{animation:fi .35s ease}@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.insight{font-size:.75rem;opacity:.6;text-align:center;margin:-4px 0 10px;min-height:1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal{text-align:center}.goal .big{font-size:3rem}.goal h3{margin:8px 0 4px;font-size:1.3rem;color:#14233c}.goal p{color:#3a4b66;font-size:.9rem}
 .thint{text-align:center;font-size:.75rem;color:#9aa6b8;margin-top:10px}
 #tview{display:block;text-align:left;font-size:.95rem;line-height:1.35;overflow:auto}
 </style></head><body>
@@ -65,7 +67,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <div class="bar" id="barwrap"><i id="barfill"></i></div>
 <main>
 
-<section id="deckView">
+<section id="deckView"><div id="insight" class="insight"></div>
 <div class="scene" id="scene"><div class="card" id="card">
 <div class="face front"><span class="tag" id="tagF"></span><div class="txt" id="q"></div><span id="lvl" class="hide"></span></div>
 <div class="face back"><span class="tag" id="tagB"></span><div class="txt list" id="a"></div><div class="foot"><span></span><button class="srcbtn" id="srcBtn" title="View source slide">🖼️</button></div></div></div></div>
@@ -81,7 +83,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010f";
+const APPV="v20261010g";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -114,7 +116,19 @@ function load(){let d;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}retu
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
 function todayRating(id){const h=data.hist[id]||[],t=today();for(let k=h.length-1;k>=0;k--)if(h[k].d==t)return h[k].r;return null}
 function avg(id){const h=data.hist[id]||[];return h.length?h.reduce((s,x)=>s+x.r,0)/h.length:null}
-function weight(c){const r=todayRating(c.id)??avg(c.id);return r==null?36:Math.pow(6-r,2)}
+function info(c){const h=data.hist[c.id]||[];const tr=todayRating(c.id);let ra=null;if(h.length){let sw=0,sv=0,w=1;for(let k=h.length-1;k>=0&&k>=h.length-8;k--){sv+=h[k].r*w;sw+=w;w*=0.6}ra=sv/sw}
+const lapse=h.length>1?Math.max(0,h[h.length-2].r-h[h.length-1].r):0;const lastD=h.length?h[h.length-1].d:null;const days=lastD?Math.max(0,Math.round((new Date(today())-new Date(lastD))/864e5)):null;
+const seen=(data.seen||{})[c.id]||0;const mins=(Date.now()-seen)/6e4;return{h,tr,ra,lapse,days,mins}}
+function priority(c){const f=info(c);if(!f.h.length)return 100;const lvl=f.tr??f.ra;let p=Math.pow(6-lvl,2)+1;p+=8*f.lapse;if(f.tr==null)p+=Math.min(f.days||0,14)*0.7+3;if(f.tr==5)p=0.4;if(f.mins<2)p*=0.3;return p}
+function weight(c){return priority(c)}
+function shortName(c){return c.q.split("\n")[0].replace(/^[\d.]+\s*/,"").replace(/\s*memory items/i,"")}
+function insight(){if(testMode){$("insight").textContent="";return}const ranked=C.map(c=>({c,f:info(c),p:priority(c)})).sort((a,b)=>b.p-a.p);const t=ranked[0];const at5=C.filter(c=>todayRating(c.id)==5).length;
+let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null?"rated "+t.f.tr+" today":"avg "+t.f.ra.toFixed(1)+(t.f.days?", "+t.f.days+"d ago":"");
+if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
+$("insight").textContent=at5==C.length?"":"Focus: "+shortName(t.c)+" — "+why+"  ·  "+at5+"/"+C.length+" at 5 today"}
+function goalScreen(){cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
+$("q").classList.remove("txt");$("q").classList.add("list");$("q").innerHTML='<div class="goal"><div class="big">🎉</div><h3>All cards at 5 today</h3><p>Every card rated 5 — nice work.</p><button class="rbtn" id="keep">Keep reviewing</button></div>';
+$("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()}}
 function pool(){return C.filter(c=>filt=="all"||String(c.s)==filt)}
 function pick(){const p=pool();const cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
 function backHTML(c){return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
@@ -140,7 +154,7 @@ $("tagF").textContent="Test complete";$("q").classList.remove("txt");$("q").clas
 const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[v]+'">'+v+"</span>";
 $("q").innerHTML='<div class="tq">✅ Test complete</div><table>'+ORDER.map((c,i)=>"<tr><td>"+(i+1)+"</td><td>"+esc(c.q.replace(/\n/g," — "))+"</td><td>"+pill(tst.run[c.id])+"</td></tr>").join("")+'</table><button class="rbtn" id="restart">Restart test</button>';
 $("restart").onclick=e=>{e.stopPropagation();tst={pos:0,run:{}};tsave();show()}}
-function show(){if(testMode&&tst.pos>=ORDER.length)return testDone();cur=testMode?ORDER[tst.pos]:pick();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";
+function show(){if(testMode&&tst.pos>=ORDER.length)return testDone();if(!testMode&&data.keep!=today()&&C.every(c=>todayRating(c.id)==5))return goalScreen();cur=testMode?ORDER[tst.pos]:pick();(data.seen=data.seen||{})[cur.id]=Date.now();insight();flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";
 const p=pool(),done=p.filter(c=>todayRating(c.id)!=null).length;$("pos").textContent="Rated today: "+done+"/"+p.length;
 const ta=p.map(c=>todayRating(c.id)).filter(x=>x!=null);$("prog").textContent=ta.length?"Today avg "+(ta.reduce((a,b)=>a+b,0)/ta.length).toFixed(1):"";
 $("barfill").style.width=(p.length?done/p.length*100:0)+"%";
@@ -156,7 +170,7 @@ function view(v){$("menu").classList.add("hide");["deckView","statsView"].forEac
 const closeMenu=()=>$("menu").classList.add("hide");
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
 $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src="img/slide"+cur.s+".png?v=3";$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
-$("scene").onclick=()=>testMode?testTap():flip();$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
+$("scene").onclick=()=>{if(!cur)return;testMode?testTap():flip()};$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
 function setTest(on){testMode=on;try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);$("restartMi").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
 $("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();closeMenu();view("deckView");show()};
