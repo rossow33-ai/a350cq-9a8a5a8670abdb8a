@@ -69,7 +69,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .hometitle{text-align:center;font-size:2.4rem;font-weight:800;letter-spacing:.02em}.homesub{text-align:center;font-size:.85rem;opacity:.6;margin-top:-10px;min-height:1em}
 .hbtn{border:0;border-radius:20px;padding:28px 0;font-size:1.4rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 24px #0004}.hbtn:active{transform:scale(.98)}
 .hf{background:#1b6fd1}.hp{background:#2a3f66}.hn{background:#2e9e5b}.hbtn{padding-left:12px;padding-right:12px}
-.psec{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.psec{display:flex;flex-direction:column;gap:16px;margin-top:18px}
 .tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
 .tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
 .tlh{position:sticky;top:-28px;z-index:2;display:grid;grid-template-columns:1fr 14px 1fr;gap:6px;background:#fff;box-shadow:0 -28px 0 #fff;padding:6px 0;font-size:.7rem;font-weight:800;letter-spacing:.08em}
@@ -94,7 +94,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 </style></head><body>
 <header><h1 id="hdrTitle"><img src="img/logo-96.png?v=2" alt="" class="logo">A350 Recurrent</h1><div id="who"><button class="icon" id="homeBtn" aria-label="Home">⌂</button><span id="testBadge" class="hide">TEST</span><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
 <div class="bar" id="barwrap"><i id="barfill"></i></div>
-<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hp" id="homeProf">Profiles</button></div></section>
+<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hf" id="profFlash">Flashcards</button><button class="hbtn ht" id="profTest">Test Mode</button><button class="hbtn hr hide" id="profRev"></button><div class="homesub" id="profResume"></div></div></section>
 
 <section id="deckView"><div id="insight" class="insight"></div>
 <div class="scene" id="scene"><div class="card" id="card">
@@ -113,7 +113,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010x";
+const APPV="v20261010y";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -244,7 +244,7 @@ function testResult(pass){if(!testMode||!flipped||!cur)return;const v=pass?"P":"
 function rate(r){if(!flipped||!cur||testMode)return;(data.hist[cur.id]=data.hist[cur.id]||[]).push({d:today(),r});if(reviewMode&&r>=4)revSet=revSet.filter(x=>x!=cur.id);save();last=cur;show()}
 function stats(){const pill=v=>v==null?"–":'<span class="pill" style="background:'+COL[Math.round(v)]+'">'+(Number.isInteger(v)?v:v.toFixed(1))+"</span>";
 $("statsBody").innerHTML=(recentGrades()?'<div class="face" style="position:static;margin-bottom:14px;padding:16px 18px">'+recentGrades()+"</div>":"")+"<table><tr><th></th><th>Card</th><th>Today</th><th>All-time avg</th><th>#</th></tr>"+C.map(c=>{const tt=(data.tests||{})[c.id]||[],np=tt.filter(t=>t.p).length,nf=tt.length-np;return "<tr><td>S"+c.s+"</td><td>"+esc(c.q.replace(/\n/g," — "))+(tt.length?'<div style="font-size:.72rem;opacity:.7;margin-top:2px">Test: <span class="ok">'+np+'✓</span> <span class="bad">'+nf+'✗</span></div>':"")+"</td><td>"+pill(todayRating(c.id))+"</td><td>"+pill(avg(c.id))+"</td><td>"+(data.hist[c.id]||[]).length+"</td></tr>"}).join("")+"</table>"}
-function view(v){const HV=v=="homeView";if(HV)reviewMode=false;updRev();$("menu").classList.add("hide");$("homeBtn").classList.toggle("hide",HV);$("menuBtn").classList.toggle("hide",HV);if(HV){$("testBadge").classList.add("hide");$("homeResume").textContent=tst.pos>0&&tst.pos<ORDER.length?"Test in progress · card "+(tst.pos+1)+"/"+ORDER.length:""}else $("testBadge").classList.toggle("hide",!testMode);["homeView","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
+function view(v){const HV=v=="homeView";if(HV&&deckId!="lim")setDeck("lim");if(HV)updProf();if(HV)reviewMode=false;updRev();$("menu").classList.add("hide");$("homeBtn").classList.toggle("hide",HV);$("menuBtn").classList.toggle("hide",HV);if(HV){$("testBadge").classList.add("hide");$("homeResume").textContent=tst.pos>0&&tst.pos<ORDER.length?"Test in progress · card "+(tst.pos+1)+"/"+ORDER.length:""}else $("testBadge").classList.toggle("hide",!testMode);["homeView","deckView","statsView"].forEach(x=>$(x).classList.toggle("hide",x!=v))}
 const closeMenu=()=>$("menu").classList.add("hide");
 $("menuBtn").onclick=()=>$("menu").classList.remove("hide");$("menu").onclick=e=>{if(e.target.id=="menu")closeMenu()};
 $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src=srcOf(cur);$("srcModal").classList.remove("hide")};$("srcModal").onclick=()=>$("srcModal").classList.add("hide");
@@ -256,7 +256,9 @@ $("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();if(!testMode)setTest(true
 $("testMi").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};$("flashMi").onclick=()=>setTest(false);
 $("homeRev").onclick=startReview;$("revMi").onclick=startReview;
 const goHome=()=>{if(deckId!="lim")setDeck("lim");view("homeView")};
-$("homeProf").onclick=()=>{setDeck("prof");setTest(false)};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
+function updProf(){let d={},t={pos:0};try{d=JSON.parse(localStorage.getItem(DECKS.prof.key))||{};t=JSON.parse(localStorage.getItem(DECKS.prof.tkey))||t}catch(e){}const n=(d.lastFailed||[]).length,L=DECKS.prof.cards.length;
+$("profRev").classList.toggle("hide",!n);$("profRev").textContent="Review · "+n;$("profResume").textContent=t.pos>0&&t.pos<L?"Test in progress · card "+(t.pos+1)+"/"+L:""}
+$("profFlash").onclick=()=>{setDeck("prof");setTest(false)};$("profTest").onclick=()=>{setDeck("prof");if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};$("profRev").onclick=()=>{setDeck("prof");startReview()};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
 $("homeFlash").onclick=()=>setTest(false);$("homeTest").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};
 $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
