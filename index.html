@@ -70,6 +70,18 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .hbtn{border:0;border-radius:20px;padding:28px 0;font-size:1.4rem;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 24px #0004}.hbtn:active{transform:scale(.98)}
 .hf{background:#1b6fd1}.hp{background:#2a3f66}.hn{background:#2e9e5b}.hbtn{padding-left:12px;padding-right:12px}
 .psec{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
+.tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
+.tlh{position:sticky;top:-28px;z-index:2;display:grid;grid-template-columns:1fr 14px 1fr;gap:6px;background:#fff;box-shadow:0 -28px 0 #fff;padding:6px 0;font-size:.7rem;font-weight:800;letter-spacing:.08em}
+.tlh span:first-child{text-align:right;color:#c8102e}.tlh span:last-child{color:#4a6fa5}
+.tln{position:relative;z-index:1;text-align:center;margin:12px 0 6px}
+.pill{display:inline-block;background:#14233c;color:#fff;font-weight:800;font-size:.8rem;padding:5px 12px;border-radius:999px;box-shadow:0 0 0 4px #fff}.pill.em{background:#c8102e}
+.tlr{display:grid;grid-template-columns:1fr 14px 1fr;gap:6px;align-items:center;margin:5px 0}
+.tc.l{text-align:right}.tdot{width:8px;height:8px;border-radius:50%;background:#c9d3e3;justify-self:center;position:relative;z-index:1}
+.chip{display:inline-block;font-size:.82rem;line-height:1.25;padding:6px 9px;border-radius:12px;max-width:100%;text-align:left;font-weight:600;color:#14233c}
+.chip.say.cpf{background:#fde8eb;border-bottom-right-radius:3px}.chip.say.cpm{background:#e6eef9;border-bottom-left-radius:3px}
+.chip.act{background:#fff;border:1.5px dashed #9aa6b8;font-weight:500;font-style:italic;color:#3a4b66}
+.tlr.ln .chip{animation:fi .35s ease}
 .backlink{align-self:flex-start;background:none;border:0;color:#cfe0ff;font-size:1rem;padding:8px 0;cursor:pointer;margin-bottom:-6px}
 .pl{display:flex;gap:10px;align-items:baseline;padding:5px 0;color:#14233c;font-weight:600}.pl .role{flex:none;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:5px;color:#fff;min-width:30px;text-align:center}.role.rpf{background:#c8102e}.role.rpm{background:#4a6fa5}.pl.act .ptx{font-weight:500;font-style:italic;color:#3a4b66}.hr{background:#d98a1c;padding:20px 0;font-size:1.15rem}.ht{background:#c8102e}#homeResume{margin-top:-8px}
 .grade{font-size:4rem;font-weight:900;line-height:1;margin:6px 0 2px}.grade span{font-size:1.2rem;font-weight:700;opacity:.6}
@@ -95,13 +107,13 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 </main>
 <footer class="legal">Not approved training material. For personal study only. Always refer to official Delta/Airbus manuals and current company publications. Not affiliated with or endorsed by Delta Air Lines or Airbus.</footer>
 <div id="menu" class="hide"><div class="panel">
-<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="homeMi">⌂  Home</button><button class="mi hide" id="testBtn"></button><button class="mi hide" id="revMi"></button><button class="mi" id="restartMi">🔄  Restart test</button><button class="mi" id="statsBtn">📊  Stats</button>
+<button class="mi" id="skip">⏭  Skip card</button><button class="mi" id="flipBtn">↺  Flip card</button><button class="mi" id="homeMi">⌂  Home</button><button class="mi" id="testMi">🧪  Test mode</button><button class="mi" id="flashMi">🃏  Flashcards</button><button class="mi hide" id="testBtn"></button><button class="mi hide" id="revMi"></button><button class="mi" id="restartMi">🔄  Restart test</button><button class="mi" id="statsBtn">📊  Stats</button>
 
 <div class="mh" id="pos"></div><div class="mh" id="prog" style="margin-top:0"></div>
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261010w";
+const APPV="v20261010x";
 function chkUpd(){(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
@@ -138,7 +150,7 @@ const PROFILES=[
 ["At Green Dot",[["PF","Select Open Climb",1],["PF","“Open Climb”"],["PM","“Open Climb”"],["PF","Select MCT",1],["PF","“MCT”"],["PM","“Thrust MCT”"]]]
 ]}
 ];
-const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,b:p.nodes.flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
+const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
 const DECKS={lim:{title:"Limitations & Memory Items",cards:LIM,key:"recurrentFC_v2",tkey:"recurrentFC_test",back:"sectionView"},
 prof:{title:"Profiles",cards:PROFILES.map(p=>profCard(p)),key:"recurrentFC_v2__prof",tkey:"recurrentFC_test__prof"}};
 let C=LIM,deckId="lim";
@@ -178,7 +190,7 @@ $("q").innerHTML='<div class="goal"><img class="party" src="img/party/'+gif+'.gi
 $("keep").onclick=e=>{e.stopPropagation();data.keep=today();save();show()};$("goalHome").onclick=e=>{e.stopPropagation();view("homeView")}}
 function pool(){return C.filter(c=>(filt=="all"||String(c.s)==filt)&&(!reviewMode||revSet.includes(c.id)))}
 function pick(){const p=pool();const cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
-function backHTML(c){return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
+function backHTML(c){if(c.nodes)return '<div class="ttl">'+esc(c.q)+'</div>'+tlHTML(c,1e9);return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
 if(r[0]=="c")return '<div class="cond">'+esc(r[1])+'</div>';if(r[0]=="n")return '<div class="nt">'+esc(r[1]).replace(/\n/g,"<br>")+'</div>';
 if(r[0]=="p")return pRow(r);if(r[0]=="f")return '<div class="flow">'+esc(r[1])+'</div>';if(r[0]=="v")return '<div class="flow">'+esc(r[1])+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+esc(r[1])+'</span></div>'}).join("")}
@@ -188,7 +200,12 @@ function rowHTML(r,reveal){const H='<span class="hid"></span>';if(r[0]=="p")retu
 if(r[0]=="n")return '<div class="nt">'+(reveal?esc(r[1]).replace(/\n/g,"<br>"):H)+'</div>';
 if(r[0]=="f"||r[0]=="v")return '<div class="flow">'+(reveal?esc(r[1]):H)+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+(reveal?esc(r[1]):H)+'</span></div>'}
-function cardLog(c,idx,n,steps,r){let h='<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>';
+function tlHTML(c,n){let h='<div class="tl"><div class="tlh"><span>PF</span><span></span><span>PM</span></div>',k=0;
+for(const [node,lines] of c.nodes){if(k>=n)break;const em=/failure|fire|warning|stall/i.test(node);h+='<div class="tln"><span class="pill'+(em?' em':'')+'">'+esc(node)+'</span></div>';
+for(const l of lines){if(k>=n)break;k++;const chip='<span class="chip '+(l[2]?'act':'say')+(l[0]=="PF"?' cpf':' cpm')+'">'+(l[2]?'▢ ':'')+esc(l[1])+'</span>';
+h+='<div class="tlr'+(k==n?' ln':'')+'"><div class="tc l">'+(l[0]=="PF"?chip:'')+'</div><div class="tdot"></div><div class="tc r">'+(l[0]=="PM"?chip:'')+'</div></div>'}}
+return h+'</div>'}
+function cardLog(c,idx,n,steps,r){if(c.nodes){return '<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>'+(n>0?tlHTML(c,n):'')}let h='<div class="tdiv">Card '+(idx+1)+'/'+ORDER.length+(r?(r=="P"?' · <span class="ok">✓ Pass</span>':' · <span class="bad">✗ Fail</span>'):'')+'</div><div class="tq">'+esc(c.q)+'</div>';
 steps.forEach((s,i)=>{if(i>=n)return;s.conds.forEach(x=>h+='<div class="cond">'+esc(x)+'</div>');h+='<div class="ln">'+rowHTML(s.r,true)+'</div>'});return h}
 function renderTest(){let h="";for(let k=0;k<tst.pos;k++){const c=ORDER[k];if(tst.run[c.id]==null)continue;const st=mkSteps(c);h+=cardLog(c,k,st.length,st,tst.run[c.id])}
 const done=tIdx==steps.length-1;h+='<div id="curCard">'+cardLog(cur,tst.pos,tIdx+1,steps,null)+'<div class="tp">'+(tIdx<0?'':'Line '+(tIdx+1)+'/'+steps.length)+'</div></div>';
@@ -234,11 +251,12 @@ $("srcBtn").onclick=e=>{e.stopPropagation();$("srcimg").src=srcOf(cur);$("srcMod
 $("scene").onclick=()=>{if(!cur)return;testMode?testTap():flip()};$("flipBtn").onclick=()=>{closeMenu();flip()};$("skip").onclick=()=>{closeMenu();if(testMode&&cur){tst.pos++;tsave()}last=cur;show()};
 $("passBtn").onclick=()=>testResult(true);$("failBtn").onclick=()=>testResult(false);
 document.querySelectorAll("#rate button").forEach(b=>b.onclick=()=>rate(+b.dataset.r));
-function setTest(on){testMode=on;reviewMode=false;try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
+function setTest(on){testMode=on;reviewMode=false;$("testMi").classList.toggle("hide",on);$("flashMi").classList.toggle("hide",!on);try{localStorage.setItem("recurrentFC_mode",on?"test":"normal")}catch(e){}$("testBtn").textContent="🧪  Test mode: "+(on?"ON":"OFF");$("testBadge").classList.toggle("hide",!on);closeMenu();view("deckView");show()}
 $("restartMi").onclick=()=>{tst={pos:0,run:{}};tsave();if(!testMode)setTest(true);else{closeMenu();view("deckView");show()}};
+$("testMi").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};$("flashMi").onclick=()=>setTest(false);
 $("homeRev").onclick=startReview;$("revMi").onclick=startReview;
-const goHome=()=>view("homeView");
-$("homeProf").onclick=()=>{setDeck("prof");view("homeView")};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
+const goHome=()=>{if(deckId!="lim")setDeck("lim");view("homeView")};
+$("homeProf").onclick=()=>{setDeck("prof");setTest(false)};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
 $("homeFlash").onclick=()=>setTest(false);$("homeTest").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};
 $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
