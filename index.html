@@ -51,6 +51,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .it{display:flex;align-items:baseline;gap:6px;padding:6px 0;color:#14233c}
 .it b{font-weight:600}.it .dl{flex:1;border-bottom:2px dotted #b8c2d2;min-width:12px}.it .ac{font-weight:800;color:#0d5a2f;text-align:right;max-width:55%}
 .nt{color:#3a4b66;font-weight:400;margin:8px 0;font-size:.88rem}
+.ptx{text-align:left;color:#1d2433;font-weight:600;font-size:1rem;line-height:1.45;margin:6px 0}.cond~.ptx{margin-left:14px}
 .flow{text-align:center;font-weight:800;color:#0d5a2f;font-size:1.15rem;line-height:1.7;margin:4px 0}
 .front .txt{font-weight:600}
 #testBadge{background:#c8102e;color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.08em;padding:4px 8px;border-radius:6px}
@@ -124,12 +125,12 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261018b";
+const APPV="v20261018c";
 function chkUpd(){if(navigator.onLine===false)return;(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")&&"serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
 const T={6:"Limitations",8:"Memory Items",9:"Memory Items",10:"Evacuation"};
-// back rows: ["c",cond] condition, [item,action] checklist line, ["n",text] note, ["f",text] flow line, ["v",text] single value
+// back rows: ["c",cond] condition, [item,action] checklist line, ["n",text] note, ["f",text] flow line, ["v",text] single value, ["t",text] plain left-aligned text line
 const LIM=[
 {id:"L-alt",s:6,q:"Maximum Operating Altitude",b:[["v","43,100′"]]},
 {id:"L-tw",s:6,q:"Maximum takeoff and landing tailwind component",b:[["v","15 knots, or as restricted by Delta Company Pages"]]},
@@ -142,6 +143,7 @@ const LIM=[
 {id:"L-oil",s:6,q:"Minimum oil",b:[["v","13 qts"]]},
 {id:"L-oxy",s:6,q:"Minimum oxygen",b:[["v","1150"]]},
 {id:"L-bat",s:6,q:"Minimum battery",b:[["v","25 volts"]]},
+{id:"L-h2o",s:6,q:"Minimum potable water",b:[["t","Confirm the potable water supply is sufficient:"],["c","— 3501-3519, 3568-3576"],["t","75 % full for European and domestic operations,"],["t","100 % full for African, Asian, South American, and Polar operations."],["c","— 3520-3535"],["t","70 % full for all destinations."]]},
 {id:"M-brk",s:8,q:"1.2.1 Loss of Braking\nmemory items",b:[["c","If no braking:"],["REV","MAX"],["BRAKE PEDALS","RELEASE"],["A-SKID OFF","ORDER"],["A-SKID","OFF"],["BRAKE PEDALS","PRESS"],["c","If still no braking:"],["PARK BRK","USE"]]},
 {id:"M-ed",s:8,q:"1.2.2 Emer Descent\nmemory items",b:[["c","If the cabin pressure altitude is above 10,000 ft:"],["CREW OXY MASKS","USE"],["SIGNS","ON"],["EMER DESCENT","INITIATE"],["n","Initiate the emergency descent with one of the following techniques:\n- Use of the AUTO EMER DESCENT function\n- Use of selected guidance via the AFS CP."],["c","If A/THR is not active:"],["ALL THR LEVERS","IDLE"],["SPEED BRAKES LEVER","FULL"]]},
 {id:"M-uas",s:9,q:"1.2.3 Unreliable Air Speed Indication\nmemory items",b:[["c","If the safe conduct of the flight is impacted:"],["A/P","OFF"],["A/THR","OFF"],["FD","OFF"],["c","PITCH/THRUST:"],["Below THR RED ALT","12.5°/TOGA"],["Above THR RED ALT and Below FL 100","10°/CLB"],["Above THR RED ALT and Above FL 100","5°/CLB"],["FLAPS (if CONF 0(1)(2)(3))","MAINTAIN CURRENT CONF"],["FLAPS (if CONF FULL)","SELECT CONF 3 AND MAINTAIN"],["SPEED BRAKES","CHECK RETRACTED"],["L/G","UP"]]},
@@ -309,12 +311,13 @@ function pool(){return C.filter(c=>(filt=="all"||String(c.s)==filt)&&(!reviewMod
 function pick(){const p=pool();const cand=p.length>1?p.filter(c=>c!==last):p;const tot=cand.reduce((s,c)=>s+weight(c),0);let x=Math.random()*tot;for(const c of cand){x-=weight(c);if(x<0)return c}return cand[cand.length-1]}
 function backHTML(c){if(c.nodes)return '<div class="ttl">'+esc(c.q)+'</div>'+tlHTML(c,1e9);return '<div class="ttl">'+esc(c.q.replace(/\n/g," — "))+'</div>'+c.b.map(r=>{
 if(r[0]=="c")return '<div class="cond">'+esc(r[1])+'</div>';if(r[0]=="n")return '<div class="nt">'+esc(r[1]).replace(/\n/g,"<br>")+'</div>';
-if(r[0]=="p")return pRow(r);if(r[0]=="f")return '<div class="flow">'+esc(r[1])+'</div>';if(r[0]=="v")return '<div class="flow">'+esc(r[1])+'</div>';
+if(r[0]=="p")return pRow(r);if(r[0]=="t")return '<div class="ptx">'+esc(r[1])+'</div>';if(r[0]=="f")return '<div class="flow">'+esc(r[1])+'</div>';if(r[0]=="v")return '<div class="flow">'+esc(r[1])+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+esc(r[1])+'</span></div>'}).join("")}
 function pRow(r){return '<div class="pl '+(r[3]?"act":"")+'"><span class="role r'+r[1].toLowerCase()+'">'+r[1]+'</span><span class="ptx">'+(r[3]?"▢ ":"")+esc(r[2])+'</span></div>'}
 function mkSteps(c){const st=[];let pend=[];c.b.forEach(r=>{if(r[0]=="c"){pend.push(r[1]);return}st.push({conds:pend,r});pend=[]});return st}
 function rowHTML(r,reveal){const H='<span class="hid"></span>';if(r[0]=="p")return pRow(r);
 if(r[0]=="n")return '<div class="nt">'+(reveal?esc(r[1]).replace(/\n/g,"<br>"):H)+'</div>';
+if(r[0]=="t")return '<div class="ptx">'+(reveal?esc(r[1]):H)+'</div>';
 if(r[0]=="f"||r[0]=="v")return '<div class="flow">'+(reveal?esc(r[1]):H)+'</div>';
 return '<div class="it"><b>'+esc(r[0])+'</b><span class="dl"></span><span class="ac">'+(reveal?esc(r[1]):H)+'</span></div>'}
 function tlHTML(c,n){const mix=c.nodes.some(x=>Array.isArray(x)&&x[1].some(l=>l[0]=="CA"||l[0]=="FO"));let h='<div class="tl"><div class="tlh"><span>'+(mix?"PF / CA":"PF")+'</span><span></span><span>'+(mix?"PM / FO":"PM")+'</span></div>',k=0;
