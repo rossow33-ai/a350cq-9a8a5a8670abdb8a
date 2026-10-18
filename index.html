@@ -74,6 +74,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 .prow .nm{flex:1}.prow .av{font-size:.7rem;font-weight:500;opacity:.6;text-align:right}.badge{min-width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;background:#ffffff22}
 #plistView{flex:1;overflow:auto}
 .tac{display:flex!important;justify-content:center;position:relative;z-index:1;margin:4px 0}.tac .chip{flex:0 0 auto;width:auto;max-width:70%;background:#eceef2;color:#4a5160;border:1px solid #c9ced8;font-style:normal}.chip.cac{background:#eceef2;color:#4a5160;border:1px solid #c9ced8;font-style:normal}.chip.cac .rl{color:#6b7280}
+.txl{text-align:left;font-size:.95rem;line-height:1.45;color:#1d2433}.txh{font-weight:800;font-size:.85rem;letter-spacing:.02em;margin:10px 0 8px;color:#0d1b3d}.txi{margin:0 0 10px;animation:fadein .3s}.txi.b{padding-left:16px;position:relative}.txi.b:before{content:"•";position:absolute;left:2px}.txi.nt{font-style:italic;color:#444}mark.hlt{background:#ffe95c;color:inherit;padding:0 2px;border-radius:3px;font-weight:600}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}}
 .psec{display:flex;flex-direction:column;gap:16px;margin-top:18px}
 .tl{position:relative;margin:6px -6px 0;padding-bottom:8px}
 .tl:before{content:"";position:absolute;left:50%;top:30px;bottom:0;width:2px;margin-left:-1px;background:#c9d3e3}
@@ -102,8 +104,8 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 </style></head><body>
 <header><h1 id="hdrTitle"><img src="img/logo-96.png?v=2" alt="" class="logo">A350 Recurrent</h1><div id="who"><button class="icon" id="homeBtn" aria-label="Home">⌂</button><span id="testBadge" class="hide">TEST</span><button class="icon" id="menuBtn" aria-label="Menu">☰</button></div></header>
 <div class="bar" id="barwrap"><i id="barfill"></i></div>
-<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hp" id="homeProf">Profiles</button></div></section>
-<section id="plistView" class="hide"><button class="backlink" id="plBack">‹ Home</button><div class="hometitle" style="font-size:1.8rem;margin:6px 0 14px">Profiles</div><div id="plist"></div></section>
+<main><section id="homeView" class="hv hide"><button class="backlink hide" id="deckBack">‹ Home</button><div class="homesub hide" id="deckSub"></div><div class="hometitle" id="deckTitle" style="font-size:1.7rem">Limitations &amp; Memory Items</div><div class="homesub hide" id="emptyMsg" style="font-size:1rem;opacity:.8;margin:20px 0">No profiles yet</div><button class="hbtn hf" id="homeFlash">Flashcards</button><button class="hbtn ht" id="homeTest">Test Mode</button><button class="hbtn hr hide" id="homeRev"></button><div class="homesub" id="homeResume"></div><div id="profSec" class="psec"><div class="hometitle" style="font-size:1.7rem">Profiles</div><button class="hbtn hp" id="homeProf">Profiles</button><div class="hometitle" style="font-size:1.7rem;margin-top:18px">Other Profiles</div><button class="hbtn hp" id="homeOth">Other Profiles</button></div></section>
+<section id="plistView" class="hide"><button class="backlink" id="plBack">‹ Home</button><div class="hometitle" id="plTitle" style="font-size:1.8rem;margin:6px 0 14px">Profiles</div><div id="plist"></div></section>
 
 <section id="deckView"><div id="stepBar" class="stepbar hide"><button id="stBack">‹ Profiles</button><button id="stAll">Show all</button></div><div id="insight" class="insight"></div>
 <div class="scene" id="scene"><div class="card" id="card">
@@ -122,7 +124,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261011o";
+const APPV="v20261018a";
 function chkUpd(){if(navigator.onLine===false)return;(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")&&"serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
@@ -253,8 +255,26 @@ const PROFILES=[
 ]}
 ];
 const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.filter(n=>Array.isArray(n)).flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
+const OTHER=[
+{id:"O-xwtw",name:"Takeoff with Crosswind > 25 kt or Tailwind",img:"img/profiles/oth-xwind-tailwind-takeoff.jpg",lines:[
+{h:"TAKEOFF WITH CROSSWIND GREATER THAN 25 KNOTS OR TAILWIND"},
+"Airbus recommends the following technique for conditions with strong crosswinds or any tailwinds.",
+"In cases where a ==crosswind of greater than 25kt or any tailwind exists==:",
+"• The sidestick should be placed ==full forward== until reaching 80kt, and",
+"• Increase thrust gradually to ==reach the CL detent at 20kt groundspeed==, and ==TOGA or FLX at 40kt groundspeed==.",
+"This thrust application technique is in contrast to the normal takeoff thrust application where the sidestick is placed approximately halfway forward and takeoff thru[…] of takeoff thrust used in this technique incurs a takeoff performance penalty.",
+"The penalty is accounted for on the WDR in the following ways:",
+"• If a tailwind is indicated on the WDR, the slower thrust application and tailwind up to the indicated tailwind on that thrust line are accounted for.",
+"• The maximum crosswind is displayed on the right side of the applicable thrust line as X25 or X35.",
+"• If X35 is displayed, then crosswinds up to the 35 kt takeoff crosswind limit are accounted for.",
+"Note: If X25 is displayed and the actual crosswind is greater than 25 knots, contact dispatch for new numbers. A TOPR request for higher crosswinds will […]",
+"Note: Once a tailwind is listed in the WDR WIND column, e.g. TW01, AWABS has applied the same RATOW penalty used for X35. In this case the X25 and […] means that although X25 is displayed, the crosswind limit is extended to 35 knots and the crosswind takeoff procedure must be performed whenever […] knots or when a tailwind component is present."
+]}
+];
+const othCard=o=>({id:o.id,s:0,q:o.name,tag:"Other",img:o.img,txt:o.lines,b:o.lines.map(l=>typeof l=="string"?["t",l]:["c",l.h])});
 const DECKS={lim:{title:"Limitations & Memory Items",cards:LIM,key:"recurrentFC_v2",tkey:"recurrentFC_test",back:"sectionView"},
-prof:{title:"Profiles",cards:PROFILES.map(p=>profCard(p)),key:"recurrentFC_v2__prof",tkey:"recurrentFC_test__prof"}};
+prof:{title:"Profiles",cards:PROFILES.map(p=>profCard(p)),key:"recurrentFC_v2__prof",tkey:"recurrentFC_test__prof"},
+oth:{title:"Other Profiles",cards:OTHER.map(othCard),key:"recurrentFC_v2__oth",tkey:"recurrentFC_test__oth"}};
 let C=LIM,deckId="lim";
 try{for(const [o,n] of [["recurrentFC_v2__pemg","recurrentFC_v2__prof"],["recurrentFC_test__pemg","recurrentFC_test__prof"]]){const v=localStorage.getItem(o);if(v&&!localStorage.getItem(n)){localStorage.setItem(n,v);localStorage.removeItem(o)}}}catch(e){}
 const $=id=>document.getElementById(id);
@@ -283,7 +303,7 @@ function insight(){if(testMode){$("insight").textContent="";return}if(reviewMode
 let why=!t.f.h.length?"not rated yet":t.f.lapse?"slipped last time":t.f.tr!=null?"rated "+t.f.tr+" today":"avg "+t.f.ra.toFixed(1)+(t.f.days?", "+t.f.days+"d ago":"");
 if(t.f.h.length&&t.f.ra!=null&&!/avg/.test(why))why="avg "+t.f.ra.toFixed(1)+" · "+why;
 const nw=C.filter(c=>!(data.hist[c.id]||[]).length).length;$("insight").textContent=at5==C.length?"":!t.f.h.length?at5+"/"+C.length+" at 5 today · "+nw+" new":"Focus: "+shortName(t.c)+" — "+why+" · "+at5+"/"+C.length+" at 5"}
-function goalScreen(){if(deckId=="prof")return openPlist();cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
+function goalScreen(){if(deckId!="lim")return openPlist();cur=null;flipped=false;$("card").classList.remove("flip");$("rate").classList.add("off");$("ratelbl").style.visibility="hidden";$("srcBtn").style.display="none";$("tagF").textContent="";$("insight").textContent="";
 $("q").classList.remove("txt");$("q").classList.add("list");const E=["🥳","🎉","🍻","🎊","🥂","🍾","✨","🙌","🕺","💃"];let hsh=0;for(const ch of today())hsh=(hsh*31+ch.charCodeAt(0))>>>0;const emo='<span>⛵</span>';
 const nToday=C.reduce((n,c)=>n+(data.hist[c.id]||[]).filter(x=>x.d==today()).length,0);const all=C.flatMap(c=>data.hist[c.id]||[]);const allAvg=all.length?(all.reduce((a,x)=>a+x.r,0)/all.length).toFixed(1):"–";const lg=(data.grades||[]).slice(-1)[0];
 $("q").innerHTML='<div class="goal"><div class="party" role="img" aria-label="celebration">'+emo+'</div><div style="font-size:.9rem;opacity:.65;margin:-4px 0 10px">Sail away</div><p>Every card rated 5 — nice work!</p>'+
@@ -360,14 +380,16 @@ $("homeRev").onclick=startReview;$("revMi").onclick=startReview;
 const goHome=()=>{if(deckId!="lim")setDeck("lim");view("homeView")};
 function updProf(){}
 function latest(id){const h=data.hist[id]||[];return h.length?h[h.length-1].r:null}
-function openPlist(){stepMode=false;setDeck("prof");$("plist").innerHTML=C.map(c=>{const r=latest(c.id),a=avg(c.id);return '<button class="prow" data-id="'+c.id+'"><span class="nm">'+esc(c.q)+'</span>'+(a!=null?'<span class="av">avg '+a.toFixed(1)+'</span>':'')+'<span class="badge" style="'+(r?'background:'+COL[r]:'')+'">'+(r||'–')+'</span></button>'}).join("");
+let plDeck="prof";function openPlist(dk){if(typeof dk=="string")plDeck=dk;stepMode=false;setDeck(plDeck);$("plTitle").textContent=DECKS[plDeck].title;$("stBack").textContent="‹ "+DECKS[plDeck].title;$("plist").innerHTML=C.map(c=>{const r=latest(c.id),a=avg(c.id);return '<button class="prow" data-id="'+c.id+'"><span class="nm">'+esc(c.q)+'</span>'+(a!=null?'<span class="av">avg '+a.toFixed(1)+'</span>':'')+'<span class="badge" style="'+(r?'background:'+COL[r]:'')+'">'+(r||'–')+'</span></button>'}).join("");
 $("plist").querySelectorAll(".prow").forEach(b=>b.onclick=()=>startStep(b.dataset.id));view("plistView")}
-function startStep(id){if(deckId!="prof")setDeck("prof");stepMode=true;testMode=false;reviewMode=false;cur=C.find(c=>c.id==id);steps=mkSteps(cur);tIdx=-1;view("deckView");modeRows();$("card").classList.remove("flip");$("srcBtn").style.display="";$("tagF").textContent="Profile";$("q").classList.remove("txt");$("q").classList.add("list");renderStep()}
-function renderStep(){const done=tIdx==steps.length-1;let h='<div class="tq">'+esc(cur.q)+'</div>'+(tIdx>=0?tlHTML(cur,tIdx+1):'')+'<div class="thint">'+(done?'Rate yourself below ↓':tIdx<0?'Tap to start · '+steps.length+' lines':'Line '+(tIdx+1)+'/'+steps.length+' · tap for next')+'</div>';
+function startStep(id){if(deckId!=plDeck)setDeck(plDeck);stepMode=true;testMode=false;reviewMode=false;cur=C.find(c=>c.id==id);steps=mkSteps(cur);tIdx=-1;view("deckView");modeRows();$("card").classList.remove("flip");$("srcBtn").style.display="";$("tagF").textContent=plDeck=="oth"?"Other":"Profile";$("q").classList.remove("txt");$("q").classList.add("list");renderStep()}
+function renderStep(){const done=tIdx==steps.length-1;let h='<div class="tq">'+esc(cur.q)+'</div>'+(tIdx>=0?(cur.txt?txHTML(cur,tIdx+1):tlHTML(cur,tIdx+1)):'')+'<div class="thint">'+(done?'Rate yourself below ↓':tIdx<0?'Tap to start · '+steps.length+' lines':'Line '+(tIdx+1)+'/'+steps.length+' · tap for next')+'</div>';
 $("q").innerHTML=h;$("rate").classList.toggle("off",!done);$("ratelbl").style.visibility=done?"":"hidden";flipped=done;$("insight").textContent="";$("barfill").style.width=(steps.length?(tIdx+1)/steps.length*100:0)+"%";
 const f=$("q").parentElement;if(f.scrollTo)f.scrollTo({top:f.scrollHeight,behavior:tIdx<=0?"auto":"smooth"});else f.scrollTop=f.scrollHeight}
+function hl(x){return esc(x).replace(/==(.+?)==/g,'<mark class="hlt">$1</mark>')}
+function txHTML(c,n){let h='<div class="txl">',k=0,pend=[];for(const l of c.txt){if(typeof l!="string"){pend.push(l.h);continue}if(k>=n)break;k++;pend.forEach(x=>h+='<div class="txh">'+esc(x)+'</div>');pend=[];const b=/^• /.test(l),nt=/^Note: /.test(l);h+='<div class="txi'+(b?' b':'')+(nt?' nt':'')+(k==n?' ln':'')+'">'+(nt?'<u>Note:</u> '+hl(l.slice(6)):b?hl(l.slice(2)):hl(l))+'</div>'}return h+'</div>'}
 function stepTap(){if(tIdx<steps.length-1){tIdx++;renderStep()}}
-$("homeProf").onclick=openPlist;$("plBack").onclick=()=>view("homeView");$("stBack").onclick=openPlist;$("stAll").onclick=()=>{tIdx=steps.length-1;renderStep()};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
+$("homeProf").onclick=()=>openPlist("prof");$("homeOth").onclick=()=>openPlist("oth");$("plBack").onclick=()=>view("homeView");$("stBack").onclick=openPlist;$("stAll").onclick=()=>{tIdx=steps.length-1;renderStep()};$("deckBack").onclick=()=>{setDeck("lim");view("homeView")};$("homeBtn").onclick=goHome;$("homeMi").onclick=goHome;
 $("homeFlash").onclick=()=>setTest(false);$("homeTest").onclick=()=>{if(tst.pos>=ORDER.length){tst={pos:0,run:{}};tsave()}setTest(true)};
 $("testBtn").onclick=()=>setTest(!testMode);$("testBadge").onclick=()=>$("menu").classList.remove("hide");
 $("statsBtn").onclick=()=>{stats();view("statsView")};$("back").onclick=()=>{view("deckView");show()};
