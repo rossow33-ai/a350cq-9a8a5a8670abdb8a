@@ -124,7 +124,7 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}td,th{padding:8px 4px;
 <button class="mi" id="reset" style="margin-top:auto;opacity:.7">⟲  Reset all progress</button></div></div>
 <div id="srcModal" class="hide"><img id="srcimg" alt="Source slide"></div>
 <script>
-const APPV="v20261018a";
+const APPV="v20261018b";
 function chkUpd(){if(navigator.onLine===false)return;(async()=>{try{const t=await (await fetch(location.pathname+"?_="+Date.now(),{cache:"no-store"})).text();const m=t.match(/APPV="([^"]+)"/);if(m&&m[1]!==APPV&&!sessionStorage.getItem("upd"+m[1])){sessionStorage.setItem("upd"+m[1],1);location.replace(location.pathname+"?v="+m[1])}}catch(e){}})()}
 if(location.protocol.startsWith("http")&&"serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})}
 if(location.protocol.startsWith("http")){chkUpd();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkUpd()})}
@@ -139,6 +139,9 @@ const LIM=[
 {id:"L-apga",s:6,q:"After a manual go around, the autopilot must not be engaged below a minimum altitude of ____.",b:[["v","100′ AGL"]]},
 {id:"L-autoland",s:6,q:"Wind limits for autoland operations\n(headwind, tailwind, and crosswinds)",b:[["Headwind","40 knots"],["Tailwind","15 knots, or as restricted by Delta Company Pages"],["Crosswinds","30 knots, including gusts"],["n","(15 knots when operating below Cat I minimums)"]]},
 {id:"L-flap",s:6,q:"Flight Controls\nMaximum Flap Extension Altitude",b:[["v","20,000′"]]},
+{id:"L-oil",s:6,q:"Minimum oil",b:[["v","13 qts"]]},
+{id:"L-oxy",s:6,q:"Minimum oxygen",b:[["v","1150"]]},
+{id:"L-bat",s:6,q:"Minimum battery",b:[["v","25 volts"]]},
 {id:"M-brk",s:8,q:"1.2.1 Loss of Braking\nmemory items",b:[["c","If no braking:"],["REV","MAX"],["BRAKE PEDALS","RELEASE"],["A-SKID OFF","ORDER"],["A-SKID","OFF"],["BRAKE PEDALS","PRESS"],["c","If still no braking:"],["PARK BRK","USE"]]},
 {id:"M-ed",s:8,q:"1.2.2 Emer Descent\nmemory items",b:[["c","If the cabin pressure altitude is above 10,000 ft:"],["CREW OXY MASKS","USE"],["SIGNS","ON"],["EMER DESCENT","INITIATE"],["n","Initiate the emergency descent with one of the following techniques:\n- Use of the AUTO EMER DESCENT function\n- Use of selected guidance via the AFS CP."],["c","If A/THR is not active:"],["ALL THR LEVERS","IDLE"],["SPEED BRAKES LEVER","FULL"]]},
 {id:"M-uas",s:9,q:"1.2.3 Unreliable Air Speed Indication\nmemory items",b:[["c","If the safe conduct of the flight is impacted:"],["A/P","OFF"],["A/THR","OFF"],["FD","OFF"],["c","PITCH/THRUST:"],["Below THR RED ALT","12.5°/TOGA"],["Above THR RED ALT and Below FL 100","10°/CLB"],["Above THR RED ALT and Above FL 100","5°/CLB"],["FLAPS (if CONF 0(1)(2)(3))","MAINTAIN CURRENT CONF"],["FLAPS (if CONF FULL)","SELECT CONF 3 AND MAINTAIN"],["SPEED BRAKES","CHECK RETRACTED"],["L/G","UP"]]},
@@ -257,18 +260,10 @@ const PROFILES=[
 const profCard=(p,cat)=>({id:p.id,s:0,q:p.name,tag:"Profile",img:p.img,nodes:p.nodes,b:p.nodes.filter(n=>Array.isArray(n)).flatMap(n=>[["c",n[0]],...n[1].map(l=>["p",l[0],l[1],!!l[2]])])});
 const OTHER=[
 {id:"O-xwtw",name:"Takeoff with Crosswind > 25 kt or Tailwind",img:"img/profiles/oth-xwind-tailwind-takeoff.jpg",lines:[
-{h:"TAKEOFF WITH CROSSWIND GREATER THAN 25 KNOTS OR TAILWIND"},
-"Airbus recommends the following technique for conditions with strong crosswinds or any tailwinds.",
-"In cases where a ==crosswind of greater than 25kt or any tailwind exists==:",
-"• The sidestick should be placed ==full forward== until reaching 80kt, and",
-"• Increase thrust gradually to ==reach the CL detent at 20kt groundspeed==, and ==TOGA or FLX at 40kt groundspeed==.",
-"This thrust application technique is in contrast to the normal takeoff thrust application where the sidestick is placed approximately halfway forward and takeoff thru[…] of takeoff thrust used in this technique incurs a takeoff performance penalty.",
-"The penalty is accounted for on the WDR in the following ways:",
-"• If a tailwind is indicated on the WDR, the slower thrust application and tailwind up to the indicated tailwind on that thrust line are accounted for.",
-"• The maximum crosswind is displayed on the right side of the applicable thrust line as X25 or X35.",
-"• If X35 is displayed, then crosswinds up to the 35 kt takeoff crosswind limit are accounted for.",
-"Note: If X25 is displayed and the actual crosswind is greater than 25 knots, contact dispatch for new numbers. A TOPR request for higher crosswinds will […]",
-"Note: Once a tailwind is listed in the WDR WIND column, e.g. TW01, AWABS has applied the same RATOW penalty used for X35. In this case the X25 and […] means that although X25 is displayed, the crosswind limit is extended to 35 knots and the crosswind takeoff procedure must be performed whenever […] knots or when a tailwind component is present."
+"==crosswind of greater than 25kt or any tailwind exists==",
+"==full forward==",
+"==reach the CL detent at 20kt groundspeed==",
+"==TOGA or FLX at 40kt groundspeed=="
 ]}
 ];
 const othCard=o=>({id:o.id,s:0,q:o.name,tag:"Other",img:o.img,txt:o.lines,b:o.lines.map(l=>typeof l=="string"?["t",l]:["c",l.h])});
